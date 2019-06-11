@@ -17,7 +17,7 @@ c.execute('''CREATE TABLE part_data
 # Create table project_timing
 c.execute('''CREATE TABLE project_timing
              (project TEXT, part TEXT, ppap_date TEXT, tooling_weeks TEXT,
-             nomination_date TEXT, rfq_weeks TEXT, drawing_date TEXT)''')
+             nomi_date TEXT, rfq_weeks TEXT, drawing_date TEXT)''')
 
 
 # Create table sourcing_concept
@@ -48,7 +48,7 @@ c.execute('''CREATE TABLE nomi_part
 # Create table nomi_invest
 c.execute('''CREATE TABLE nomi_invest
              (project TEXT, part TEXT, vendor TEXT, tool INTEGER,
-             nomination_date TEXT, cavity INTEGER, tool_cost INTEGER,
+             nomi_date TEXT, cavity INTEGER, tool_cost INTEGER,
              copy_tool_cost INTEGER, further_invest_cost INTEGER, currency
-             TEXT, nomination_ppap_date TEXT, nomination_fot_date TEXT,
-             nomination_loops TEXT, nomination_letter_signed TEXT)''')
+             TEXT, nomi_ppap_date TEXT, nomi_fot_date TEXT,
+             nomi_loops TEXT, nomi_letter_signed TEXT)''')
