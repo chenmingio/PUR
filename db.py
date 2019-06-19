@@ -9,10 +9,10 @@ def dict_factory_single(cursor, row):
         d[col[0]] = row[id]
     return d
 
-def dict_factory_multi(cursor, rows):
+def dict_factory_multi(cursor, rows, table):
     d =  {}
     for part, row in enumerate(rows):
-            d['part'+str(part)] = dict_factory_single(cursor, row)
+            d[table + str(part)] = dict_factory_single(cursor, row)
     return d
 
 
@@ -98,74 +98,118 @@ def creat_tables():
     conn.close()
 
 
+def search_part_combine(project, vendor):
+    '''find the part list, search part info one by one and combine to a big
+    list'''
 
-def nl_search_part_batch(project, vendor):
+    parts = search_pn(project, vendor)
+    d = {}
+    part_d = {}
+
+    
+    for id, part in enumerate(parts):
+        part_info = search_part_info(project, vendor, part)
+        year_info = search_year_info(project, vendor, part)
+        invest_info = search_invest_info(project, vendor, part)
+        part_d['part' + str(id)] = dict(part_info=part_info, year_info=year_info,
+                invest_info=invest_info)
+    
+    d['part'] = part_d
+    d['vendor'] = search_vendor_info(vendor)
+
+    return d
+        
+
+def search_pn(project, vendor):
+    '''search part numbers from nomi_part sheet'''
 
     c = conn.cursor()
     t = (project, vendor)
 
-    c.execute('''SELECT * FROM rfq_part AS RP LEFT JOIN nomi_part AS NP ON
-    RP.project=NP.project AND RP.part=NP.part AND RP.year=NP.year LEFT JOIN
-    part_data AS PD ON RP.part=PD.part LEFT JOIN project_data AS PJD ON
-    RP.project=PJD.project WHERE RP.project=? AND NP.vendor=?''', t) 
+    c.execute('''SELECT DISTINCT part FROM nomi_part WHERE project=? AND
+            vendor=? ORDER BY part''', t) 
 
-    print(c.fetchall())
+    rows = c.fetchall()
+    list = [item[0] for item in rows]
+    
+    return list
 
 
-def nl_search_part(project, vendor):
 
-    # conn.row_factory = sqlite3.Row
+def search_part_info(project, vendor, part):
+    '''return part info based for single part'''
 
     c = conn.cursor()
-    t = (project, vendor)
+    t = (project, vendor, part)
 
     c.execute('''SELECT DISTINCT NP.project, PJD.project_name, NP.part, NP.vendor, PD.nr_id,
     PD.part_description, PD.mtl_group, PD.raw_mtl, PD.currency, PD.buyer FROM
     nomi_part AS NP LEFT JOIN part_data AS PD ON NP.part=PD.part LEFT JOIN
-    project_data AS PJD ON NP.project=PJD.project WHERE NP.project=? AND NP.vendor=?''', t) 
+    project_data AS PJD ON NP.project=PJD.project WHERE NP.project=? AND
+    NP.vendor=? AND NP.part=?''', t) 
 
-    rows = c.fetchall()
+    row = c.fetchone()
     
-    dict = dict_factory_multi(c, rows)
-    print(dict)
+    dict = dict_factory_single(c, row)
+    # dict = dict_factory_multi(c, rows, 'part')
 
-
-    # titles = c.description
-    # print(titles)
-
-    return c.fetchall()
+    return dict
 
 
 
-def nl_search_part_year(project, vendor):
+def search_year_info(project, vendor, part):
+    '''find year related info based on the given pn'''
+
     c = conn.cursor()
-    t = (project, vendor)
+    t = (project, vendor, part)
 
     c.execute('''SELECT DISTINCT RP.part, RP.year, RP.volume, NP.vendor, NP.price100,
     NP.qs FROM rfq_part AS RP LEFT JOIN nomi_part AS NP ON RP.project=NP.project AND
-    RP.part=NP.part AND RP.year=NP.year WHERE RP.project=? AND NP.vendor=?''', t) 
+    RP.part=NP.part AND RP.year=NP.year WHERE RP.project=? AND NP.vendor=? AND
+    RP.part=? ORDER BY RP.year''', t) 
 
-    print(c.fetchall())
+    rows = c.fetchall()
+    
+    dict = dict_factory_multi(c, rows, 'year')
+
+    return dict
 
 
-# nl_search_part_year("1111P.000099", "48200025")
+# search_part_year("1111P.000099", "48200025")
 
 
-def nl_search_invest(project, vendor):
+def search_invest_info(project, vendor, part):
+    '''fine invest info based on given pn'''
     c = conn.cursor()
-    t = (project, vendor)
+    t = (project, vendor, part)
 
     c.execute('''SELECT * FROM nomi_invest AS NI WHERE NI.project=? AND
-    NI.vendor=?''', t)  
+    NI.vendor=? AND NI.part=? ORDER BY NI.tool''', t)  
 
-    print(c.description)
+    rows = c.fetchall()
+    
+    dict = dict_factory_multi(c, rows, 'invest')
 
-    print(c.fetchall())
+    return dict
 
-# nl_search_invest("1111P.000099", "48200025")
+def search_vendor_info(vendor):
+
+    c = conn.cursor()
+    t = (vendor,)
+
+    c.execute('''SELECT * FROM vendors WHERE vendor =?''', t) 
+
+    row = c.fetchone()
+    
+    if row:
+        dict = dict_factory_single(c, row)
+        return dict
+    else:
+        return {}
+    
 
 
-def nl_clear_nr(tables):
+def clear_nr(tables):
     for table in tables:
         c = conn.cursor()
 
@@ -177,14 +221,23 @@ def nl_clear_nr(tables):
 
     conn.commit()
 
-# nl_clear_nr(['vendors', 'contacts', 'buyers'])
-
-# nl_clear_nr(['project_data', 'part_data', 'project_timing', 'sourcing_concept',
-    # 'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest'])
 
 if __name__ == "__main__":
-    nl_search_part("1111E.001169", "48201484")
 
+    project = "1111E.001169"
+    vendor = "48200041"
+    part = "935.314-01"
+
+    
+    # print(search_pn(project, vendor))
+    print(search_part_combine(project, vendor))
+    # print(search_vendor_info(vendor))
+    # print(search_year_info(project, vendor, part))
+    # print(search_part(project, vendor, part))
+    # clear_nr(['vendors', 'contacts', 'buyers'])
+
+    # clear_nr(['project_data', 'part_data', 'project_timing', 'sourcing_concept',
+        # 'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest'])
 
 
 # conn.close()
