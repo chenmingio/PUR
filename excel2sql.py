@@ -10,6 +10,7 @@ c = conn.cursor()
 
 # connect excel
 wb = openpyxl.load_workbook('00_Collector.xlsx')
+# wb = openpyxl.load_workbook('info_extra.xlsx')
 sheets = wb.get_sheet_names()
 
 for sheet_name in sheets:
@@ -20,14 +21,16 @@ for sheet_name in sheets:
     max_col = sheet.max_column
     titles = [sheet[get_column_letter(i) + '1'].value for i in range(1, max_col + 1)]
 
-    print(titles)
+    # print(titles)
 
     # prepare insert_list
     insert_list = []
     max_row = sheet.max_row
-    for j in range(2, max_row):
+    print(max_row)
+    for j in range(2, max_row + 1):
         row = tuple([sheet[get_column_letter(i) + str(j)].value for i in range(1,
             max_col + 1)])
+        print(row)
         insert_list.append(row)
 
     # print(insert_list)
@@ -36,7 +39,7 @@ for sheet_name in sheets:
     # prepare string
     question_mark = '(' + "?," * (len(titles) - 1) + '?)'
     string = "INSERT INTO {0} VALUES {1}".format(sheet_name, question_mark)
-    print(string)
+    # print(string)
 
     c.executemany(string, insert_list)
 
