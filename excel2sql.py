@@ -12,7 +12,6 @@ def load_data(file):
 
     # connect excel
     wb = openpyxl.load_workbook(file)
-    # wb = openpyxl.load_workbook('info_extra.xlsx')
     sheets = wb.get_sheet_names()
 
     for sheet_name in sheets:
@@ -51,5 +50,5 @@ def load_data(file):
 
 
 if __name__=="__main__":
-    load_data('info_extra.xlsx')
+    load_data('00_Collector.xlsx')
 
