@@ -1,8 +1,14 @@
 '''handle the CRUD function around sqlites db'''
 import sqlite3
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 
 CONN = sqlite3.connect('nr.db', check_same_thread=False)
+
+SHEET_LIST = ['project_data', 'part_data', 'project_timing',
+              'sourcing_concept', 'rfq_part', 'rfq_invest',
+              'nomi_part', 'nomi_invest']
 
 
 def dict_factory_single(cursor, row):
@@ -90,7 +96,6 @@ def creat_tables():
                  phone TEXT)''')
 
     CONN.commit()
-    CONN.close()
 
 
 def search_part_combine(project, vendor):
@@ -103,12 +108,12 @@ def search_part_combine(project, vendor):
 
     # build part_info
     for id_num, part in enumerate(part_list):
-        part_info = search_part_description(part)
-        year_info = search_year_info(project, vendor, part)
-        invest_info = search_invest_info(project, vendor, part)
-        part_info['part' + str(id_num)] = result(part_info=part_info,
-                                                 year_info=year_info,
-                                                 invest_info=invest_info)
+        mtl = search_part_description(part)
+        yearly = search_year_info(project, vendor, part)
+        invest = search_invest_info(project, vendor, part)
+        part_info['part' + str(id_num)] = dict(mtl=mtl,
+                                               yearly=yearly,
+                                               invest=invest)
 
     result['part'] = part_info
     result['vendor'] = search_vendor_info(vendor)
@@ -215,9 +220,9 @@ def search_project_info(project):
     return {}
 
 
-def clear_nr(tables):
-    ''' docstring '''
-    for table in tables:
+def clear_data():
+    ''' remove the data from sheet in SHEET_LIST '''
+    for table in SHEET_LIST:
         cursor = CONN.cursor()
 
         string = "DELETE FROM " + table
@@ -229,20 +234,53 @@ def clear_nr(tables):
     CONN.commit()
 
 
+def load_data(file):
+    '''load excel file'''
+    # connect excel
+    work_book = openpyxl.load_workbook(file)
+    sheets = work_book.get_sheet_names()
+    cursor = CONN.cursor()
+
+    for sheet_name in sheets:
+
+        sheet = work_book.get_sheet_by_name(sheet_name)
+
+        # read titles
+        max_col = sheet.max_column
+        titles = [sheet[get_column_letter(i) + '1'].value
+                  for i in range(1, max_col + 1)]
+
+        # print(titles)
+
+        # prepare insert_list
+        insert_list = []
+        max_row = sheet.max_row
+        print(max_row)
+        for j in range(2, max_row + 1):
+            row = tuple([sheet[get_column_letter(i)
+                               + str(j)].value for i in range(1, max_col + 1)])
+            print(row)
+            insert_list.append(row)
+
+        # print(insert_list)
+        # insert list into sql
+        # prepare string
+        question_mark = '(' + "?," * (len(titles) - 1) + '?)'
+        string = "INSERT INTO {0} VALUES {1}".format(sheet_name, question_mark)
+        # print(string)
+
+        cursor.executemany(string, insert_list)
+
+    CONN.commit()
+
+
 if __name__ == "__main__":
 
     TEST_PROJECT = "1111E.001239"
     TEST_VENDOR = "48200025"
     TEST_PART = "230.033-00"
 
-    print(search_pn(TEST_PROJECT, TEST_VENDOR))
-    print(search_project_info(TEST_PROJECT))
-    print(search_year_info(TEST_PROJECT, TEST_VENDOR, TEST_PART))
-    # print(search_part(project, vendor, part))
-    # clear_nr(['vendors', 'contacts', 'buyers'])
-
-    # clear_nr(['project_data', 'part_data', 'project_timing',
-    # 'sourcing_concept',
-    # 'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest'])
-
-    # CONN.close()
+    # print(search_pn(TEST_PROJECT, TEST_VENDOR))
+    # print(search_project_info(TEST_PROJECT))
+    # print(search_year_info(TEST_PROJECT, TEST_VENDOR, TEST_PART))
+    search_part_combine(TEST_PROJECT, TEST_VENDOR)
