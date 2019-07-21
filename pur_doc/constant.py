@@ -1,10 +1,12 @@
 # store the constant
 
 # database url string
-db_url = '../nr.db'
+db_url = './pur_doc/data/nr.db'
 
 
 # excel files names
+
+FILES = ['01_nr.xlsx', '02_vendor.xlsx', '03_project.xlsx', 'nl.docx']
 
 XLS_FILES = ['nr_collector', 'vendor_data', 'project_data']
 
