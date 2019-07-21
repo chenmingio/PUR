@@ -1,18 +1,15 @@
-'''handle the CRUD function around sqlites db'''
+'''build dict by sql query and factory'''
 import sqlite3
 import openpyxl
-from openpyxl.utils import get_column_letter
 
+# from pur_doc.constant import DB_URL
+DB_URL = './data/nr.db'
 
-CONN = sqlite3.connect('nr.db', check_same_thread=False)
-
-SHEET_LIST = ['project_data', 'part_data', 'project_timing',
-              'sourcing_concept', 'rfq_part', 'rfq_invest',
-              'nomi_part', 'nomi_invest']
+CONN = sqlite3.connect(DB_URL, check_same_thread=False)
 
 
 def dict_factory_single(cursor, row):
-    '''docstring'''
+    '''use cursor.description as iterable and build a dict with titile and value'''
     result = {}
     for id_num, col in enumerate(cursor.description):
         result[col[0]] = row[id_num]
@@ -25,77 +22,6 @@ def dict_factory_multi(cursor, rows, table):
     for part_id, row in enumerate(rows):
         result[table + str(part_id)] = dict_factory_single(cursor, row)
     return result
-
-
-def creat_tables():
-    ''' docstring '''
-    cursor = CONN.cursor()
-
-    # Create table project_ata
-    cursor.execute('''CREATE TABLE project_data
-                 (project TEXT, plant TEXT, project_name TEXT)''')
-
-    # Create table part_data
-    cursor.execute('''CREATE TABLE part_data
-                 (project TEXT, nr_id TEXT, part TEXT, part_description TEXT,
-                 mtl_group TEXT, raw_mtl TEXT, currency TEXT, risk_level TEXT,
-                 buyer TEXT)''')
-
-    # Create table project_timing
-    cursor.execute('''CREATE TABLE project_timing
-                 (project TEXT, part TEXT, ppap_date TEXT, tooling_weeks TEXT,
-                   nomi_date TEXT, rfq_weeks TEXT, drawing_date TEXT)''')
-
-    # Create table sourcing_concept
-    cursor.execute('''CREATE TABLE sourcing_concept
-                 (project TEXT, part TEXT, vendor TEXT, vendor_nominated TEXT,
-                 vendor_active TEXT)''')
-
-    # Create table rfq_part
-    cursor.execute('''CREATE TABLE rfq_part
-                 (project TEXT, part TEXT, year INTEGER, volume INTEGER,
-                 target_price100 REAL)''')
-
-    # Create table rfq_invest
-    cursor.execute('''CREATE TABLE rfq_invest
-                 (project TEXT, part TEXT, tool INTEGER, tool_description TEXT,
-                 cav_target INTEGER, cost_target INTEGER, loop_target TEXT,
-                 copy_tool_name TEXT, copy_tool_cost INTEGER,
-                 further_invest_name TEXT, further_invest_cost INTEGER)''')
-
-    # Create table nomi_part
-    cursor.execute('''CREATE TABLE nomi_part
-                 (project TEXT, part TEXT, vendor TEXT, year INTEGER, price100
-                 REAL, lta REAL, qs INTEGER, quota REAL)''')
-
-    # Create table nomi_invest
-    cursor.execute('''CREATE TABLE nomi_invest
-                 (project TEXT, part TEXT, vendor TEXT, tool INTEGER,
-                 nomi_date TEXT, cavity INTEGER, tool_cost INTEGER,
-                 copy_tool_cost INTEGER, further_invest_cost INTEGER, currency
-                 TEXT, nomi_ppap_date TEXT, nomi_fot_date TEXT,
-                 nomi_loops TEXT, nomi_letter_signed TEXT)''')
-
-    # Create table vendors
-    cursor.execute('''CREATE TABLE vendors
-                 (vendor TEXT, vendor_name TEXT, address TEXT, city TEXT,
-                 province TEXT, country TEXT, delivery_reg_date TEXT,
-                 tool_contract_date TEXT, framework_date TEXT, shifts_per_day
-                 INTEGER, shift_duration INTEGER, days_per_week INTEGER,
-                 weeks_per_year INTEGER, flex_pre INTEGER, flex_duration
-                 INTEGER, flex_froz INTEGER)''')
-
-    # Create table contacts
-    cursor.execute('''CREATE TABLE contacts
-                 (vendor TEXT, function TEXT, name TEXT, email TEXT,
-                 phone TEXT)''')
-
-    # Create table buyers
-    cursor.execute('''CREATE TABLE buyers
-                 (buyer TEXT, name TEXT, email TEXT,
-                 phone TEXT)''')
-
-    CONN.commit()
 
 
 def search_part_combine(project, vendor):
@@ -205,13 +131,15 @@ def search_vendor_info(vendor):
     return None
 
 
-def search_project_info(project):
-    '''docstring'''
+def search_project(project):
+    '''combine project info'''
     cursor = CONN.cursor()
     context = (project,)
 
-    cursor.execute('''SELECT * FROM project_data WHERE project=?''', context)
+    # cursor.execute('''SELECT * FROM project_data AS pd LEFT JOIN project_info AS PI ON pd.project=PI.project WHERE project=?''', context)
+    cursor.execute('''SELECT * FROM project_info WHERE project=?''', context)
 
+    # return one row
     row = cursor.fetchone()
 
     if row:
@@ -220,58 +148,6 @@ def search_project_info(project):
     return {}
 
 
-def clear_data():
-    ''' remove the data from sheet in SHEET_LIST '''
-    for table in SHEET_LIST:
-        cursor = CONN.cursor()
-
-        string = "DELETE FROM " + table
-        print(string)
-
-        cursor.execute(string)
-        print(table + ' delected.')
-
-    CONN.commit()
-
-
-def load_data(file):
-    '''load excel file'''
-    # connect excel
-    work_book = openpyxl.load_workbook(file)
-    sheets = work_book.get_sheet_names()
-    cursor = CONN.cursor()
-
-    for sheet_name in sheets:
-
-        sheet = work_book.get_sheet_by_name(sheet_name)
-
-        # read titles
-        max_col = sheet.max_column
-        titles = [sheet[get_column_letter(i) + '1'].value
-                  for i in range(1, max_col + 1)]
-
-        # print(titles)
-
-        # prepare insert_list
-        insert_list = []
-        max_row = sheet.max_row
-        print(max_row)
-        for j in range(2, max_row + 1):
-            row = tuple([sheet[get_column_letter(i)
-                               + str(j)].value for i in range(1, max_col + 1)])
-            print(row)
-            insert_list.append(row)
-
-        # print(insert_list)
-        # insert list into sql
-        # prepare string
-        question_mark = '(' + "?," * (len(titles) - 1) + '?)'
-        string = "INSERT INTO {0} VALUES {1}".format(sheet_name, question_mark)
-        # print(string)
-
-        cursor.executemany(string, insert_list)
-
-    CONN.commit()
 
 
 if __name__ == "__main__":
@@ -281,6 +157,6 @@ if __name__ == "__main__":
     TEST_PART = "230.033-00"
 
     # print(search_pn(TEST_PROJECT, TEST_VENDOR))
-    # print(search_project_info(TEST_PROJECT))
+    print(search_project(TEST_PROJECT))
     # print(search_year_info(TEST_PROJECT, TEST_VENDOR, TEST_PART))
-    search_part_combine(TEST_PROJECT, TEST_VENDOR)
+    # search_part_combine(TEST_PROJECT, TEST_VENDOR)

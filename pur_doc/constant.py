@@ -1,7 +1,11 @@
 # store the constant
 
-# database url string
-db_url = './pur_doc/data/nr.db'
+# path management
+DB_URL = './pur_doc/data/nr.db'
+
+TEMPLATE_PATH = "./pur_doc/templates"
+
+FILE_PATH = "./pur_doc/data"
 
 
 # excel files names

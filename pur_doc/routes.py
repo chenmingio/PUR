@@ -1,10 +1,8 @@
 '''main module. Handle url with bottle framework'''
 from bottle import get, post, route, run, request, view, static_file
 
-from pur_doc.constant import FILES
+from pur_doc.constant import FILES, TEMPLATE_PATH, FILE_PATH
 from pur_doc.excel2sql import reload_excel
-
-TEMPLATE_PATH = "./pur_doc/templates"
 
 
 # return a page for file upload
@@ -24,7 +22,7 @@ def save_upload():
     if filename in FILES:
 
         # Just overwrite the file with same name
-        save_path = "./pur_doc/data"
+        save_path = FILE_PATH
         upload.save(save_path, overwrite=True)
 
         # after excel file is uploaded, trigger the event to refresh database
@@ -54,5 +52,4 @@ def nomination_letter():
 
     return static_file('NL_g.docx', root='./')
     # return "{}, {}".format(project, vendor)
-
 

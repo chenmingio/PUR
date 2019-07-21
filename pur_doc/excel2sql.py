@@ -2,11 +2,11 @@ import pandas as pd
 from pandas import ExcelWriter
 from pandas import ExcelFile
 
-from pur_doc.constant import db_url
+from pur_doc.constant import DB_URL
 
 import sqlite3
 
-CONN = sqlite3.connect(db_url)
+CONN = sqlite3.connect(DB_URL)
 
 # xls_name = 'nr_collector.xlsx'
 
