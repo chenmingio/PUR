@@ -23,3 +23,8 @@ PROJECT_SHEETS = []
 # FY exchange rate to CNY
 
 EX_RATE = {'EUR': 8.14, 'CNY': 1, 'USD': 6.898}
+
+# PVO threshold
+
+LOCAL_SB_THRESHOLD = 250000
+

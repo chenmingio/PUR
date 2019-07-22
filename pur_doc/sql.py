@@ -2,7 +2,7 @@
 import sqlite3
 import openpyxl
 
-from pur_doc.constant import DB_URL, EX_RATE
+from pur_doc.constant import DB_URL, EX_RATE, LOCAL_SB_THRESHOLD
 # DB_URL = './data/nr.db'
 
 CONN = sqlite3.connect(DB_URL, check_same_thread=False)
@@ -157,33 +157,50 @@ def get_part_list_project(project):
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
 
-    return result   
+    return result
 
 def get_part_pvo(project, part):
-    '''get PVO and return boolean if reach 250KEUR'''
+    '''return PVO by project and part'''
 
     cursor = CONN.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT volume*target_price100 AS year_PVO FROM rfq_part WHERE project=? AND part=?''', context)
+    cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?) GROUP BY year_PVO''', context)
 
-    rows = cursor.fetchall()
+    row = cursor.fetchone()
 
+    pvo = row[0] / EX_RATE['EUR']
 
+    return int(pvo)
+
+def get_part_risk(part):
+    '''get risk level'''
+
+    cursor = CONN.cursor()
+    context = (part,)
+
+    cursor.execute('''SELECT risk_level FROM part_data WHERE part=?''', context)
+
+    row = cursor.fetchone()
+
+    return row[0]
 
 
 def search_part_list_project_4sb(project):
     '''given a project, return all parts with risk_level = H or annual PVO > 250KEUR'''
 
+    all_parts = get_part_list_project(project)
 
-if __name__ == "__main__":
+    parts_4sb = []
 
-    TEST_PROJECT = "1111E.001239"
-    TEST_VENDOR = "48200025"
-    TEST_PART = "230.033-00"
+    for part in all_parts:
+        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD and get_part_risk(part) == 'H'):
+            parts_4sb.append(part)
 
-    # print(search_pn(TEST_PROJECT, TEST_VENDOR))
-    # print(search_project(TEST_PROJECT))
-    # print(search_year_info(TEST_PROJECT, TEST_VENDOR, TEST_PART))
-    # search_part_combine(TEST_PROJECT, TEST_VENDOR)
-    print(get_part_list_project(TEST_PROJECT))
+    return parts_4sb
+
+
+def search_part_info(project, part):
+    '''return all the part info related to certain part in certain project into a dict'''
+
+    pass

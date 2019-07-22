@@ -8,9 +8,15 @@ TEST_PART = "230.033-00"
 
 class TestSum(unittest.TestCase):
 
-    def test_sql_get_part_list_project(self):
-        print(sql.get_part_list_project(TEST_PROJECT))
-        self.assertEqual(sql.get_part_list_project(TEST_PROJECT), [230.033-00, 230.033-10, 230.038-00, 230.038-10, 178.576-49])
+    def test_sql(self):
+
+        # self.assertCountEqual(sql.get_part_list_project(TEST_PROJECT), ['230.033-00', '230.033-10', '230.038-00', '230.038-10', '178.576-49'])
+
+        # self.assertAlmostEqual(sql.get_part_pvo(TEST_PROJECT, TEST_PART), 5073)
+
+        # self.assertEqual(sql.get_part_risk(TEST_PART), 'L')
+
+        self.assertCountEqual(sql.search_part_list_project_4sb(TEST_PROJECT), [])
 
 
 if __name__ == '__main__':
