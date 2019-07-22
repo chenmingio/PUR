@@ -20,4 +20,6 @@ VENDOR_SHEETS = []
 
 PROJECT_SHEETS = []
 
-# tables name
+# FY exchange rate to CNY
+
+EX_RATE = {'EUR': 8.14, 'CNY': 1, 'USD': 6.898}

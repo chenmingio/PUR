@@ -2,7 +2,7 @@
 from bottle import get, post, route, run, request, view, static_file
 
 from pur_doc.constant import FILES, TEMPLATE_PATH, FILE_PATH
-from pur_doc.excel2sql import reload_excel
+from pur_doc.load_excel import load_excel
 
 
 # return a page for file upload
@@ -26,7 +26,7 @@ def save_upload():
         upload.save(save_path, overwrite=True)
 
         # after excel file is uploaded, trigger the event to refresh database
-        reload_excel(filename)
+        load_excel(filename)
 
         return filename + ' updated.'
 

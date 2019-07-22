@@ -2,8 +2,8 @@
 import sqlite3
 import openpyxl
 
-# from pur_doc.constant import DB_URL
-DB_URL = './data/nr.db'
+from pur_doc.constant import DB_URL, EX_RATE
+# DB_URL = './data/nr.db'
 
 CONN = sqlite3.connect(DB_URL, check_same_thread=False)
 
@@ -132,12 +132,11 @@ def search_vendor_info(vendor):
 
 
 def search_project(project):
-    '''combine project info'''
+    '''return combined project info in one dict'''
     cursor = CONN.cursor()
     context = (project,)
 
-    # cursor.execute('''SELECT * FROM project_data AS pd LEFT JOIN project_info AS PI ON pd.project=PI.project WHERE project=?''', context)
-    cursor.execute('''SELECT * FROM project_info WHERE project=?''', context)
+    cursor.execute('''SELECT * FROM project_info LEFT JOIN project_data USING (project) WHERE project=?''', context)
 
     # return one row
     row = cursor.fetchone()
@@ -147,7 +146,34 @@ def search_project(project):
         return result
     return {}
 
+def get_part_list_project(project):
+    '''given a project, return a list with all parts'''
 
+    cursor = CONN.cursor()
+    context = (project, )
+
+    cursor.execute('''SELECT DISTINCT part FROM sourcing_concept WHERE project=? ORDER BY part''', context)
+
+    rows = cursor.fetchall()
+    result = [item[0] for item in rows]
+
+    return result   
+
+def get_part_pvo(project, part):
+    '''get PVO and return boolean if reach 250KEUR'''
+
+    cursor = CONN.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT volume*target_price100 AS year_PVO FROM rfq_part WHERE project=? AND part=?''', context)
+
+    rows = cursor.fetchall()
+
+
+
+
+def search_part_list_project_4sb(project):
+    '''given a project, return all parts with risk_level = H or annual PVO > 250KEUR'''
 
 
 if __name__ == "__main__":
@@ -157,6 +183,7 @@ if __name__ == "__main__":
     TEST_PART = "230.033-00"
 
     # print(search_pn(TEST_PROJECT, TEST_VENDOR))
-    print(search_project(TEST_PROJECT))
+    # print(search_project(TEST_PROJECT))
     # print(search_year_info(TEST_PROJECT, TEST_VENDOR, TEST_PART))
     # search_part_combine(TEST_PROJECT, TEST_VENDOR)
+    print(get_part_list_project(TEST_PROJECT))

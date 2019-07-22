@@ -11,7 +11,7 @@ CONN = sqlite3.connect(DB_URL)
 # xls_name = 'nr_collector.xlsx'
 
 
-def reload_excel(filename):
+def load_excel(filename):
     path_to_xls = './pur_doc/data/' + filename
 
     # read the excel file to dataframe
@@ -21,5 +21,5 @@ def reload_excel(filename):
             # read the sheet data
             df = pd.read_excel(xls, sheet)
             # export to sql
-            df.to_sql(sheet, con=CONN, if_exists='replace')
+            df.to_sql(sheet, con=CONN, if_exists='replace', index=False)
 
