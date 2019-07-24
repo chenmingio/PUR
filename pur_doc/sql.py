@@ -17,20 +17,20 @@ def dict_factory_single_row(cursor, row):
     return result
 
 
-def dict_factory_single_col(curosr, rows, title):
-    '''produce the dict with title+id. eg: year_1, year_2, year_3...'''
-
-    pass
-
-
 def dict_factory_multi(cursor, rows, title):
-    '''coursor contains title information
-        rows is the data
-        title is name you want to give them'''
+    ''''''
+
     result = {}
-    for id, row in enumerate(rows):
-        result[title + '_' + str(id)] = dict_factory_single_row(cursor, row)
+
+    for id_num, value in enumerate(rows, start=1):
+        for num, tuple in enumerate(cursor.description):
+            key_name = tuple[0] + '_' + title + '_' + str(id_num) 
+            val = value[num]
+
+            result[key_name] = val
+    
     return result
+
 
 
 def search_part_combine(project, vendor):
@@ -56,16 +56,45 @@ def search_part_combine(project, vendor):
 
     return result
 
-def combine_output_by_project_and_vendor(project, vendor):
-    '''output the whole dict for one project'''
+def assemble_project(project, sb=False):
 
-    pass
+    result = {}
+    
+    result['parts'] = assemble_parts_for_project(project, sb)
+
+    result['project'] = get_project_info(project)
+
+    return result
 
 
-def combine_output_by_project_and_vendor_and_parts(project, vendor, part_list):
-    '''output the whole dict for one project'''
+def assemble_parts_for_project(project, sb=False):
+    '''get the part list for sb, assemble single part dict for each'''
 
-    pass
+    result = {}
+
+    if sb == False:
+        part_list = get_project_part_list(project)
+    else:
+        part_list = get_project_part_list_4sb(project)
+
+    for part_id, part_number in enumerate(part_list, start=1):
+        key_name = 'part_' + str(part_id)
+        result[key_name] = assemble_single_part(project, part_number)
+
+    return result
+
+
+def assemble_single_part(project, part):
+    '''assemble the dict for single part'''
+
+    result = {}
+
+    result['general_info'] = get_part_general_info(part)
+    result['yearly_info'] = get_part_year_info(project, part)
+    result['invest_target'] = get_part_invest_target(project, part)
+    result['quotations'] = 'TODO'
+
+    return result
 
 def combined_output(project, part, vendor):
     '''
@@ -112,21 +141,40 @@ def combined_output(project, part, vendor):
 
     return result
 
-def get_quotation_prices(project, part, vendor):
-    '''get prices info''' 
+def get_part_year_info(project, part):
+    '''get yearly info into a dictionary like {price_Y1, volume_Y2, QS_Y3, target_price100_Y4...}''' 
 
     cursor = CONN.cursor()
-    context = (project, vendor, part)
+    context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT RP.part, RP.year, RP.volume, NP.vendor,
-              NP.price100,NP.qs FROM rfq_part AS RP
-              LEFT JOIN nomi_part AS NP ON RP.project=NP.project AND
-              RP.part=NP.part AND RP.year=NP.year WHERE RP.project=?
-              AND NP.vendor=? AND RP.part=? ORDER BY RP.year''', context)
+
+    cursor.execute('''SELECT DISTINCT RP.volume, RP.target_price100 
+              FROM rfq_part AS RP
+              WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
 
     rows = cursor.fetchall()
 
+    result = dict_factory_multi(cursor, rows, 'year')
+
+    return(result)
+
     
+def get_part_invest_target(project, part):
+    ''''''
+    cursor = CONN.cursor()
+    context = (project, part)
+
+
+    cursor.execute('''SELECT DISTINCT *
+              FROM rfq_invest AS RI
+              WHERE RI.project=? AND RI.part=? ORDER BY RI.tool''', context)
+
+    rows = cursor.fetchall()
+
+    result = dict_factory_multi(cursor, rows, 'tool')
+
+    return(result)
+
 
 
 def get_part_general_info(part):
@@ -145,26 +193,6 @@ def get_part_general_info(part):
 
     return result
 
-
-def search_year_info(project, vendor, part):
-    '''find year related info based on the given project/vendor/part'''
-
-    cursor = CONN.cursor()
-    context = (project, vendor, part)
-    print(context)
-
-    cursor.execute('''SELECT DISTINCT RP.part, RP.year, RP.volume, NP.vendor,
-              NP.price100,NP.qs FROM rfq_part AS RP
-              LEFT JOIN nomi_part AS NP ON RP.project=NP.project AND
-              RP.part=NP.part AND RP.year=NP.year WHERE RP.project=?
-              AND NP.vendor=? AND RP.part=? ORDER BY RP.year''', context)
-
-    rows = cursor.fetchall()
-    print(rows)
-
-    result = dict_factory_multi(cursor, rows, 'year')
-
-    return result
 
 
 def search_invest_info(project, vendor, part):
@@ -271,7 +299,7 @@ def get_project_part_list_4sb(project):
     parts_4sb = []
 
     for part in all_parts:
-        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD and get_part_risk(part) == 'H'):
+        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD or get_part_risk(part) == 'H'):
             parts_4sb.append(part)
 
     return parts_4sb
