@@ -164,7 +164,6 @@ def xls_inject_supplier_selection(project):
     with zipfile.ZipFile('./output/ss.zip', 'w') as new_zip:
         for name in output_file_list:
             new_zip.write(name)
-            print(name)
 
     # remove the excel files
     for name in output_file_list:
