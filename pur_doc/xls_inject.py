@@ -1,13 +1,16 @@
 '''use dict to inject data into excel'''
+import os, zipfile
 from openpyxl import load_workbook
-from pur_doc import sql
+from pur_doc import sql, constant
+TEMPLATE_PATH = constant.TEMPLATE_PATH
 
+from os import remove
 
 def xls_inject_risk_eval(project):
     '''xxx'''
 
     file_name = 'risk_eval'
-    file_path = './templates/data/' + file_name + '.xlsx'
+    file_path = TEMPLATE_PATH + file_name + '.xlsx'
     sheet_name = 'Risk Evaluation'
 
     # load workbook into openpyxl
@@ -96,7 +99,7 @@ def xls_inject_risk_eval(project):
     sheet['N16'] = project_dict['project']['pur'] if project_dict['parts']['part_5']['general_info']['part'] else None
 
     # save the inject
-    wb.save(file_name + '_output.xlsx')
+    wb.save('./output/' + file_name + '_output.xlsx')
 
 
 def xls_inject_supplier_selection(project):
@@ -106,7 +109,7 @@ def xls_inject_supplier_selection(project):
     project_dict = sql.assemble_project(project)
 
     file_name = 'supplier_selection'
-    file_path = './pur_doc/templates/' + file_name + '.xlsx'
+    file_path = TEMPLATE_PATH + file_name + '.xlsx'
     sheet_name = 'Supplier Selection'
 
     # load workbook into openpyxl
@@ -116,6 +119,8 @@ def xls_inject_supplier_selection(project):
     sheet = wb[sheet_name]
 
     part_qty = len(project_dict['project']['part_list'])
+    
+    output_file_list = []
 
     for n in range(1, part_qty +1):
 
@@ -151,7 +156,20 @@ def xls_inject_supplier_selection(project):
         # TODO add planned sourcing date value into R25
 
         # save the inject
-        wb.save(file_name + '_' + part + '_output.xlsx')
+        outout_file_name = './output/' + file_name + '_' + part + '_output.xlsx'
+        wb.save(outout_file_name)
+        output_file_list.append(outout_file_name)
+
+    # zip the output files
+    with zipfile.ZipFile('./output/ss.zip', 'w') as new_zip:
+        for name in output_file_list:
+            new_zip.write(name)
+            print(name)
+
+    # remove the excel files
+    for name in output_file_list:
+        remove(name)
+
 
 def xls_inject_sb(project):
     '''xxx'''

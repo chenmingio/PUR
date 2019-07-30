@@ -3,6 +3,7 @@ from bottle import get, post, route, run, request, view, static_file
 
 from pur_doc.constant import FILES, TEMPLATE_PATH, FILE_PATH
 from pur_doc.load_excel import load_excel
+from pur_doc.xls_inject import *
 
 
 # return a page for file upload
@@ -53,3 +54,34 @@ def nomination_letter():
     return static_file('NL_g.docx', root='./')
     # return "{}, {}".format(project, vendor)
 
+
+@get('/re')
+@view('risk_eval.html', template_lookup=[TEMPLATE_PATH])
+def risk_eval_get():
+    return {}
+
+
+@post('/re')
+def risk_eval_post():
+    '''return risk eval xlsx file'''
+
+    project = request.forms.get('project')
+    xls_inject_risk_eval(project)
+
+    return static_file('risk_eval_output.xlsx', root='./output/')
+    
+
+@get('/ss')
+@view('supplier_selection.html', template_lookup=[TEMPLATE_PATH])
+def supplier_selection_get():
+    return {}
+
+
+@post('/ss')
+def supplier_selection_post():
+    '''return supplier selection xlsx file'''
+
+    project = request.forms.get('project')
+    xls_inject_supplier_selection(project)
+
+    return static_file('ss.zip', root='./output/')

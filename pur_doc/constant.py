@@ -3,9 +3,9 @@
 # path management
 DB_URL = './pur_doc/data/nr.db'
 
-TEMPLATE_PATH = "./pur_doc/templates"
+TEMPLATE_PATH = "./pur_doc/templates/"
 
-FILE_PATH = "./pur_doc/data"
+FILE_PATH = "./pur_doc/templates"
 
 
 # excel files names

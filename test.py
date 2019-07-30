@@ -48,7 +48,7 @@ class TestSum(unittest.TestCase):
 
         # print(sql.assemble_parts_for_project(TEST_PROJECT2))
 
-        print(sql.assemble_project(TEST_PROJECT2))
+        # print(sql.assemble_project(TEST_PROJECT2))
 
         # print(sql.get_part_volume_4project(TEST_PROJECT, TEST_PART))
 
@@ -64,7 +64,7 @@ class TestSum(unittest.TestCase):
 
     def test_inject(self):
 
-        # xls_inject_risk_eval(TEST_PROJECT2)
+        xls_inject_risk_eval(TEST_PROJECT2)
 
         # xls_inject_supplier_selection(TEST_PROJECT2)
 
