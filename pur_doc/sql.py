@@ -53,6 +53,8 @@ def assemble_project(project, sb=False):
 
     result['project']['part_list_sb'] = get_project_part_list_sb(project)
 
+    result['vendors'] = assemble_vendors(project)
+
     return result
 
 def assemble_vendors(project):
