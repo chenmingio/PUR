@@ -453,58 +453,58 @@ def xls_inject_sb(project):
     sheet['FI100'] = project_dict['vendors'][part_4_vendor_4]['short_name'] if part_4_vendor_4 else None
 
     # supplier framwork agreement
-    sheet['O101'] = 'yes' if project_dict['vendors'][part_1_vendor_1]['framework_date'] else None
-    sheet['V101'] = 'yes' if project_dict['vendors'][part_1_vendor_2]['framework_date'] else None
-    sheet['AC101'] = 'yes' if project_dict['vendors'][part_1_vendor_3]['framework_date'] else None
-    sheet['AJ101'] = 'yes' if project_dict['vendors'][part_1_vendor_4]['framework_date'] else None
-    sheet['BF101'] = 'yes' if project_dict['vendors'][part_2_vendor_1]['framework_date'] else None
-    sheet['BM101'] = 'yes' if project_dict['vendors'][part_2_vendor_2]['framework_date'] else None
-    sheet['BT101'] = 'yes' if project_dict['vendors'][part_2_vendor_3]['framework_date'] else None
-    sheet['CA101'] = 'yes' if project_dict['vendors'][part_2_vendor_4]['framework_date'] else None
-    sheet['CW101'] = 'yes' if project_dict['vendors'][part_3_vendor_1]['framework_date'] else None
-    sheet['DD101'] = 'yes' if project_dict['vendors'][part_3_vendor_2]['framework_date'] else None
-    sheet['DK101'] = 'yes' if project_dict['vendors'][part_3_vendor_3]['framework_date'] else None
-    sheet['DR101'] = 'yes' if project_dict['vendors'][part_3_vendor_4]['framework_date'] else None
-    sheet['EN101'] = 'yes' if project_dict['vendors'][part_4_vendor_1]['framework_date'] else None
-    sheet['EU101'] = 'yes' if project_dict['vendors'][part_4_vendor_2]['framework_date'] else None
-    sheet['FB101'] = 'yes' if project_dict['vendors'][part_4_vendor_3]['framework_date'] else None
-    sheet['FI101'] = 'yes' if project_dict['vendors'][part_4_vendor_4]['framework_date'] else None
+    sheet['O101'] = 'yes' if part_1_vendor_1 and project_dict['vendors'][part_1_vendor_1]['framework_date'] else None
+    sheet['V101'] = 'yes' if part_1_vendor_2 and project_dict['vendors'][part_1_vendor_2]['framework_date'] else None
+    sheet['AC101'] = 'yes' if part_1_vendor_3 and project_dict['vendors'][part_1_vendor_3]['framework_date'] else None
+    sheet['AJ101'] = 'yes' if part_1_vendor_4 and project_dict['vendors'][part_1_vendor_4]['framework_date'] else None
+    sheet['BF101'] = 'yes' if part_2_vendor_1 and project_dict['vendors'][part_2_vendor_1]['framework_date'] else None
+    sheet['BM101'] = 'yes' if part_2_vendor_2 and project_dict['vendors'][part_2_vendor_2]['framework_date'] else None
+    sheet['BT101'] = 'yes' if part_2_vendor_3 and project_dict['vendors'][part_2_vendor_3]['framework_date'] else None
+    sheet['CA101'] = 'yes' if part_2_vendor_4 and project_dict['vendors'][part_2_vendor_4]['framework_date'] else None
+    sheet['CW101'] = 'yes' if part_3_vendor_1 and project_dict['vendors'][part_3_vendor_1]['framework_date'] else None
+    sheet['DD101'] = 'yes' if part_3_vendor_2 and project_dict['vendors'][part_3_vendor_2]['framework_date'] else None
+    sheet['DK101'] = 'yes' if part_3_vendor_3 and project_dict['vendors'][part_3_vendor_3]['framework_date'] else None
+    sheet['DR101'] = 'yes' if part_3_vendor_4 and project_dict['vendors'][part_3_vendor_4]['framework_date'] else None
+    sheet['EN101'] = 'yes' if part_4_vendor_1 and project_dict['vendors'][part_4_vendor_1]['framework_date'] else None
+    sheet['EU101'] = 'yes' if part_4_vendor_2 and project_dict['vendors'][part_4_vendor_2]['framework_date'] else None
+    sheet['FB101'] = 'yes' if part_4_vendor_3 and project_dict['vendors'][part_4_vendor_3]['framework_date'] else None
+    sheet['FI101'] = 'yes' if part_4_vendor_4 and project_dict['vendors'][part_4_vendor_4]['framework_date'] else None
 
-    # supplier framwork agreement
-    sheet['O102'] = 'yes' if project_dict['vendors'][part_1_vendor_1]['delivery_regulation_date'] else None
-    sheet['V102'] = 'yes' if project_dict['vendors'][part_1_vendor_2]['delivery_regulation_date'] else None
-    sheet['AC102'] = 'yes' if project_dict['vendors'][part_1_vendor_3]['delivery_regulation_date'] else None
-    sheet['AJ102'] = 'yes' if project_dict['vendors'][part_1_vendor_4]['delivery_regulation_date'] else None
-    sheet['BF102'] = 'yes' if project_dict['vendors'][part_2_vendor_1]['delivery_regulation_date'] else None
-    sheet['BM102'] = 'yes' if project_dict['vendors'][part_2_vendor_2]['delivery_regulation_date'] else None
-    sheet['BT102'] = 'yes' if project_dict['vendors'][part_2_vendor_3]['delivery_regulation_date'] else None
-    sheet['CA102'] = 'yes' if project_dict['vendors'][part_2_vendor_4]['delivery_regulation_date'] else None
-    sheet['CW102'] = 'yes' if project_dict['vendors'][part_3_vendor_1]['delivery_regulation_date'] else None
-    sheet['DD102'] = 'yes' if project_dict['vendors'][part_3_vendor_2]['delivery_regulation_date'] else None
-    sheet['DK102'] = 'yes' if project_dict['vendors'][part_3_vendor_3]['delivery_regulation_date'] else None
-    sheet['DR102'] = 'yes' if project_dict['vendors'][part_3_vendor_4]['delivery_regulation_date'] else None
-    sheet['EN102'] = 'yes' if project_dict['vendors'][part_4_vendor_1]['delivery_regulation_date'] else None
-    sheet['EU102'] = 'yes' if project_dict['vendors'][part_4_vendor_2]['delivery_regulation_date'] else None
-    sheet['FB102'] = 'yes' if project_dict['vendors'][part_4_vendor_3]['delivery_regulation_date'] else None
-    sheet['FI102'] = 'yes' if project_dict['vendors'][part_4_vendor_4]['delivery_regulation_date'] else None
+    # supplier delivery regulation
+    sheet['O102'] = 'yes' if part_1_vendor_1 and project_dict['vendors'][part_1_vendor_1]['delivery_regulation_date'] else None
+    sheet['V102'] = 'yes' if part_1_vendor_2 and project_dict['vendors'][part_1_vendor_2]['delivery_regulation_date'] else None
+    sheet['AC102'] = 'yes' if part_1_vendor_3 and project_dict['vendors'][part_1_vendor_3]['delivery_regulation_date'] else None
+    sheet['AJ102'] = 'yes' if part_1_vendor_4 and project_dict['vendors'][part_1_vendor_4]['delivery_regulation_date'] else None
+    sheet['BF102'] = 'yes' if part_2_vendor_1 and project_dict['vendors'][part_2_vendor_1]['delivery_regulation_date'] else None
+    sheet['BM102'] = 'yes' if part_2_vendor_2 and project_dict['vendors'][part_2_vendor_2]['delivery_regulation_date'] else None
+    sheet['BT102'] = 'yes' if part_2_vendor_3 and project_dict['vendors'][part_2_vendor_3]['delivery_regulation_date'] else None
+    sheet['CA102'] = 'yes' if part_2_vendor_4 and project_dict['vendors'][part_2_vendor_4]['delivery_regulation_date'] else None
+    sheet['CW102'] = 'yes' if part_3_vendor_1 and project_dict['vendors'][part_3_vendor_1]['delivery_regulation_date'] else None
+    sheet['DD102'] = 'yes' if part_3_vendor_2 and project_dict['vendors'][part_3_vendor_2]['delivery_regulation_date'] else None
+    sheet['DK102'] = 'yes' if part_3_vendor_3 and project_dict['vendors'][part_3_vendor_3]['delivery_regulation_date'] else None
+    sheet['DR102'] = 'yes' if part_3_vendor_4 and project_dict['vendors'][part_3_vendor_4]['delivery_regulation_date'] else None
+    sheet['EN102'] = 'yes' if part_4_vendor_1 and project_dict['vendors'][part_4_vendor_1]['delivery_regulation_date'] else None
+    sheet['EU102'] = 'yes' if part_4_vendor_2 and project_dict['vendors'][part_4_vendor_2]['delivery_regulation_date'] else None
+    sheet['FB102'] = 'yes' if part_4_vendor_3 and project_dict['vendors'][part_4_vendor_3]['delivery_regulation_date'] else None
+    sheet['FI102'] = 'yes' if part_4_vendor_4 and project_dict['vendors'][part_4_vendor_4]['delivery_regulation_date'] else None
 
     # supplier tool contract
-    sheet['O103'] = 'yes' if project_dict['vendors'][part_1_vendor_1]['tool_contract_date'] else None
-    sheet['V103'] = 'yes' if project_dict['vendors'][part_1_vendor_2]['tool_contract_date'] else None
-    sheet['AC103'] = 'yes' if project_dict['vendors'][part_1_vendor_3]['tool_contract_date'] else None
-    sheet['AJ103'] = 'yes' if project_dict['vendors'][part_1_vendor_4]['tool_contract_date'] else None
-    sheet['BF103'] = 'yes' if project_dict['vendors'][part_2_vendor_1]['tool_contract_date'] else None
-    sheet['BM103'] = 'yes' if project_dict['vendors'][part_2_vendor_2]['tool_contract_date'] else None
-    sheet['BT103'] = 'yes' if project_dict['vendors'][part_2_vendor_3]['tool_contract_date'] else None
-    sheet['CA103'] = 'yes' if project_dict['vendors'][part_2_vendor_4]['tool_contract_date'] else None
-    sheet['CW103'] = 'yes' if project_dict['vendors'][part_3_vendor_1]['tool_contract_date'] else None
-    sheet['DD103'] = 'yes' if project_dict['vendors'][part_3_vendor_2]['tool_contract_date'] else None
-    sheet['DK103'] = 'yes' if project_dict['vendors'][part_3_vendor_3]['tool_contract_date'] else None
-    sheet['DR103'] = 'yes' if project_dict['vendors'][part_3_vendor_4]['tool_contract_date'] else None
-    sheet['EN103'] = 'yes' if project_dict['vendors'][part_4_vendor_1]['tool_contract_date'] else None
-    sheet['EU103'] = 'yes' if project_dict['vendors'][part_4_vendor_2]['tool_contract_date'] else None
-    sheet['FB103'] = 'yes' if project_dict['vendors'][part_4_vendor_3]['tool_contract_date'] else None
-    sheet['FI103'] = 'yes' if project_dict['vendors'][part_4_vendor_4]['tool_contract_date'] else None
+    sheet['O103'] = 'yes' if part_1_vendor_1 and project_dict['vendors'][part_1_vendor_1]['tool_contract_date'] else None
+    sheet['V103'] = 'yes' if part_1_vendor_2 and project_dict['vendors'][part_1_vendor_2]['tool_contract_date'] else None
+    sheet['AC103'] = 'yes' if part_1_vendor_3 and project_dict['vendors'][part_1_vendor_3]['tool_contract_date'] else None
+    sheet['AJ103'] = 'yes' if part_1_vendor_4 and project_dict['vendors'][part_1_vendor_4]['tool_contract_date'] else None
+    sheet['BF103'] = 'yes' if part_2_vendor_1 and project_dict['vendors'][part_2_vendor_1]['tool_contract_date'] else None
+    sheet['BM103'] = 'yes' if part_2_vendor_2 and project_dict['vendors'][part_2_vendor_2]['tool_contract_date'] else None
+    sheet['BT103'] = 'yes' if part_2_vendor_3 and project_dict['vendors'][part_2_vendor_3]['tool_contract_date'] else None
+    sheet['CA103'] = 'yes' if part_2_vendor_4 and project_dict['vendors'][part_2_vendor_4]['tool_contract_date'] else None
+    sheet['CW103'] = 'yes' if part_3_vendor_1 and project_dict['vendors'][part_3_vendor_1]['tool_contract_date'] else None
+    sheet['DD103'] = 'yes' if part_3_vendor_2 and project_dict['vendors'][part_3_vendor_2]['tool_contract_date'] else None
+    sheet['DK103'] = 'yes' if part_3_vendor_3 and project_dict['vendors'][part_3_vendor_3]['tool_contract_date'] else None
+    sheet['DR103'] = 'yes' if part_3_vendor_4 and project_dict['vendors'][part_3_vendor_4]['tool_contract_date'] else None
+    sheet['EN103'] = 'yes' if part_4_vendor_1 and project_dict['vendors'][part_4_vendor_1]['tool_contract_date'] else None
+    sheet['EU103'] = 'yes' if part_4_vendor_2 and project_dict['vendors'][part_4_vendor_2]['tool_contract_date'] else None
+    sheet['FB103'] = 'yes' if part_4_vendor_3 and project_dict['vendors'][part_4_vendor_3]['tool_contract_date'] else None
+    sheet['FI103'] = 'yes' if part_4_vendor_4 and project_dict['vendors'][part_4_vendor_4]['tool_contract_date'] else None
 
     # supplier quality management 
     sheet['O104'] = project_dict['vendors'][part_1_vendor_1]['quality_mgnt_signed'] if part_1_vendor_1 else None
@@ -668,6 +668,74 @@ def xls_inject_sb(project):
     sheet['EU121'] = project_dict['vendors'][part_4_vendor_2]['safety_representative'] if part_4_vendor_2 else None
     sheet['FB121'] = project_dict['vendors'][part_4_vendor_3]['safety_representative'] if part_4_vendor_3 else None
     sheet['FI121'] = project_dict['vendors'][part_4_vendor_4]['safety_representative'] if part_4_vendor_4 else None
+
+    # decision sourcing approval area
+    # target area
+    sheet['K127'] = project_dict['parts']['part_1']['general_info']['nr_id'] or None
+    sheet['AV127'] = project_dict['parts']['part_2']['general_info']['nr_id'] or None
+    sheet['CG127'] = project_dict['parts']['part_3']['general_info']['nr_id'] or None
+    sheet['DR127'] = project_dict['parts']['part_4']['general_info']['nr_id'] or None
+
+    sheet['K132'] = project_dict['project']['customer_nomination_available'] or None
+    sheet['AV132'] = project_dict['project']['customer_nomination_available'] or None
+    sheet['CG132'] = project_dict['project']['customer_nomination_available'] or None
+    sheet['DR132'] = project_dict['project']['customer_nomination_available'] or None
+
+    sheet['K133'] = project_dict['project']['budget_available'] or None
+    sheet['AV133'] = project_dict['project']['budget_available'] or None
+    sheet['CG133'] = project_dict['project']['budget_available'] or None
+    sheet['DR133'] = project_dict['project']['budget_available'] or None
+
+    sheet['K135'] = len(project_dict['parts']['part_1']['quotations']) or None
+    sheet['AV135'] = len(project_dict['parts']['part_2']['quotations']) or None
+    sheet['CG135'] = len(project_dict['parts']['part_3']['quotations']) or None
+    sheet['DR135'] = len(project_dict['parts']['part_4']['quotations']) or None
+
+    # currency
+    sheet['K140'] = project_dict['parts']['part_1']['general_info']['currency'] or None
+    sheet['AV140'] = project_dict['parts']['part_2']['general_info']['currency'] or None
+    sheet['CG140'] = project_dict['parts']['part_3']['general_info']['currency'] or None
+    sheet['DR140'] = project_dict['parts']['part_4']['general_info']['currency'] or None
+
+    # target price
+    sheet['K143'] = project_dict['parts']['part_1']['target_price']['target_price100_year_1'] or None
+    sheet['AV143'] = project_dict['parts']['part_2']['target_price']['target_price100_year_1'] or None
+    sheet['CG143'] = project_dict['parts']['part_3']['target_price']['target_price100_year_1'] or None
+    sheet['DR143'] = project_dict['parts']['part_4']['target_price']['target_price100_year_1'] or None
+
+    # target tool cost
+    sheet['K150'] = project_dict['parts']['part_1']['invest_target']['cost_target_tool_1'] or None
+    sheet['AV150'] = project_dict['parts']['part_2']['invest_target']['cost_target_tool_1'] or None
+    sheet['CG150'] = project_dict['parts']['part_3']['invest_target']['cost_target_tool_1'] or None
+    sheet['DR150'] = project_dict['parts']['part_4']['invest_target']['cost_target_tool_1'] or None
+
+    # target further invest cost
+    sheet['K154'] = project_dict['parts']['part_1']['invest_target']['further_invest_cost_tool_1'] or None
+    sheet['AV154'] = project_dict['parts']['part_2']['invest_target']['further_invest_cost_tool_1'] or None
+    sheet['CG154'] = project_dict['parts']['part_3']['invest_target']['further_invest_cost_tool_1'] or None
+    sheet['DR154'] = project_dict['parts']['part_4']['invest_target']['further_invest_cost_tool_1'] or None
+
+    # target PVO
+    sheet['K159'] = project_dict['parts']['part_1']['general_info']['pvo'] or None
+    sheet['AV159'] = project_dict['parts']['part_2']['general_info']['pvo'] or None
+    sheet['CG159'] = project_dict['parts']['part_3']['general_info']['pvo'] or None
+    sheet['DR159'] = project_dict['parts']['part_4']['general_info']['pvo'] or None
+
+    # quotation area
+
+    # vendor names
+    sheet['P138'] = project_dict['vendors'][part_1_vendor_1] or None
+    sheet['W138'] = project_dict['vendors'][part_1_vendor_2] or None
+    sheet['AD138'] = project_dict['vendors'][part_1_vendor_3] or None
+    sheet['BA138'] = project_dict['vendors'][part_2_vendor_1] or None
+    sheet['BH138'] = project_dict['vendors'][part_2_vendor_2] or None
+    sheet['BO138'] = project_dict['vendors'][part_2_vendor_3] or None
+    sheet['CL138'] = project_dict['vendors'][part_3_vendor_1] or None
+    sheet['CS138'] = project_dict['vendors'][part_3_vendor_2] or None
+    sheet['CZ138'] = project_dict['vendors'][part_3_vendor_3] or None
+    sheet['DW138'] = project_dict['vendors'][part_4_vendor_1] or None
+    sheet['ED138'] = project_dict['vendors'][part_4_vendor_2] or None
+    sheet['EK138'] = project_dict['vendors'][part_4_vendor_3] or None
 
 
 

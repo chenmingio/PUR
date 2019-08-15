@@ -104,6 +104,7 @@ def assemble_single_part(project, part):
     result['general_info']['pvo'] = get_part_pvo(project, part)
 
     result['quotations'] = assemble_quotation_single_part(project, part)
+    # result['nominated_vendor'] = get_nominated_vendor(project, part)
 
     return result
 
@@ -229,6 +230,19 @@ def get_vendor_list(project):
     return result
 
 
+def get_nominated_vendor(project, part):
+    '''check the sourcing_concept which supplier is marked as nominated'''
+
+    cursor = CONN.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? AND part=? AND vendor_nominated='X' ORDER BY vendor''', context)
+
+    row = cursor.fetchone()
+
+    return row[0]
+
+
 def get_vendor_info(vendor):
     '''get all general vendor info'''
 
@@ -290,8 +304,14 @@ def get_part_pvo(project, part):
     cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?) GROUP BY year_PVO''', context)
 
     row = cursor.fetchone()
+    part_pvo = row[0]
 
-    pvo = row[0] / EX_RATE['EUR']
+    cursor.execute('''SELECT SUM(invest_target) FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''', context)
+
+    row = cursor.fetchone()
+    invest_pvo = row[0] or 0
+
+    pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
 
     return int(pvo)
 
@@ -379,6 +399,14 @@ def get_vendor_list_4part(project, part):
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
+    
+    nominated_vendor = get_nominated_vendor(project, part)
+    
+    if nominated_vendor:
+        a = result.index(nominated_vendor)
+        temp = result[0]
+        result[0] = nominated_vendor
+        result[a] = temp
 
     return result
 

@@ -64,7 +64,7 @@ class TestSum(unittest.TestCase):
 
         # xls_inject_supplier_selection(TEST_PROJECT2)
 
-        xls_inject_sb(TEST_PROJECT2)
+        # xls_inject_sb(TEST_PROJECT2)
 
 
         pass
