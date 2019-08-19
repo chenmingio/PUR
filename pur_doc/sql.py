@@ -39,6 +39,23 @@ def dict_factory_multi(cursor, rows, title):
     
     return result
 
+def assemble_nl_info(project, vendor, part_list):
+
+    result = rec_dd()
+    result['vendor'] = get_vendor_info(vendor)
+    result['project'] = get_project_info(project)
+
+    quotation = rec_dd()
+    part_info = rec_dd()
+    for id, part in enumerate(part_list, start=1):
+        quotation['part_' + str(id)] = assemble_quotation_single_vendor(project, part, vendor)
+        part_info['part_' + str(id)] = get_part_general_info(part)
+        
+    result['quotation'] = quotation
+    result['part_info'] = part_info
+
+    return result
+
 
 
 def assemble_project(project, sb=False):
@@ -410,3 +427,16 @@ def get_vendor_list_4part(project, part):
 
     return result
 
+def get_part_list_by_project_vendor(project, vendor):
+    '''function for nl_generate in route module'''
+
+    cursor = CONN.cursor()
+    context = (project, vendor)
+
+    cursor.execute('''SELECT DISTINCT part FROM nomi_part 
+                        WHERE project=? AND vendor=? ORDER BY part''', context)
+
+    rows = cursor.fetchall()
+    result = [row[0] for row in rows]
+
+    return result

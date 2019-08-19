@@ -5,7 +5,7 @@ DB_URL = './pur_doc/data/nr.db'
 
 TEMPLATE_PATH = "./pur_doc/templates/"
 
-FILE_PATH = "./pur_doc/templates"
+FILE_PATH = "./pur_doc/output"
 
 
 # excel files names

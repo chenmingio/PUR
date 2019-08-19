@@ -1,23 +1,21 @@
 import os
 from docxtpl import DocxTemplate
+from pur_doc import sql, constant
 
+TEMPLATE_PATH = constant.TEMPLATE_PATH
 
-def generate_nl(context):
+def generate_nl(inject_data):
 
-    filePath = "./NL_generated.docx"
+    template_file_path = TEMPLATE_PATH + 'nl.docx'
+    output_file_path = './output/nl_output.docx'
 
-    if os.path.exists(filePath):
-        os.remove(filePath)
-        print("nl generated")
+    if os.path.exists(output_file_path):
+        os.remove(output_file_path)
     else:
-        print("no generated nl yet")
+        pass
 
-    doc = DocxTemplate("NL.docx")
+    doc = DocxTemplate(template_file_path)
 
-    doc.render(context)
+    doc.render(inject_data)
 
-    doc.save("NL_g.docx")
-
-
-if __name__=="__main__":
-    generate_nl()
+    doc.save(output_file_path)
