@@ -47,12 +47,22 @@ def assemble_nl_info(project, vendor, part_list):
 
     quotation = rec_dd()
     part_info = rec_dd()
+    volume_in_1000 = rec_dd()
+    volume_in_week = rec_dd()
+    invest = rec_dd()
+
     for id, part in enumerate(part_list, start=1):
         quotation['part_' + str(id)] = assemble_quotation_single_vendor(project, part, vendor)
         part_info['part_' + str(id)] = get_part_general_info(part)
+        volume_in_1000['part_' + str(id)] = get_part_volume_in1000(project, part)
+        volume_in_week['part_' + str(id)] = get_part_volume_inweek(project, part, vendor)
+        invest['part_' + str(id)] = get_part_invest_target(project, part)
         
     result['quotation'] = quotation
     result['part_info'] = part_info
+    result['kvol'] = volume_in_1000 #use vol to short word length in word...
+    result['wvol'] = volume_in_week #use vol to short word length in word...
+    result['invest'] = invest
 
     return result
 
@@ -152,13 +162,53 @@ def assemble_quotation_single_part(project, part):
     return result
 
 
+def get_part_volume_inweek(project, part, vendor):
+    '''get part volume devided by weeks_per_year of vendor and mulitiply 1.3''' 
+
+    cursor = CONN.cursor()
+    context = (vendor, )
+
+    # get wpy of vendor
+    cursor.execute('''SELECT weeks_per_year AS wpy FROM vendor_production AS VP
+              WHERE VP.vendor=?''', context)
+
+    wpy = float(cursor.fetchone()[0])
+
+    context2 = (wpy, project, part)
+
+    cursor.execute('''SELECT ROUND(RP.volume/1000/?*1.3,2) AS vol FROM rfq_part AS RP
+              WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context2)
+
+    rows = cursor.fetchall()
+
+    result = dict_factory_multi(cursor, rows, 'y')
+
+    return(result)
+
+
+def get_part_volume_in1000(project, part):
+    '''get part volume in unit K''' 
+
+    cursor = CONN.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT RP.volume/1000 AS vol FROM rfq_part AS RP
+              WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
+
+    rows = cursor.fetchall()
+
+    result = dict_factory_multi(cursor, rows, 'y')
+
+    return(result)
+
+
 def get_part_volume(project, part):
     '''get part volume''' 
 
     cursor = CONN.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT RP.volume FROM rfq_part AS RP
+    cursor.execute('''SELECT RP.volume FROM rfq_part AS RP
               WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
 
     rows = cursor.fetchall()
@@ -270,6 +320,7 @@ def get_vendor_info(vendor):
     NATURAL JOIN vendor_contact AS VC 
     NATURAL JOIN contract AS C
     NATURAL JOIN quality AS Q
+    NATURAL JOIN vendor_production AS P
     WHERE vendor=?''', context)
 
     row = cursor.fetchone()
@@ -286,7 +337,8 @@ def get_project_info(project):
     context = (project,)
 
     cursor.execute(
-        '''SELECT * FROM project_info LEFT JOIN project_data USING (project) WHERE project=?''', context)
+        '''SELECT * FROM project_info LEFT JOIN project_data USING (project) 
+            LEFT JOIN plant USING (plant) WHERE project=?''', context)
 
     # return one row
     row = cursor.fetchone()

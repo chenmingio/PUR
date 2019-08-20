@@ -1,7 +1,7 @@
 '''main module. Handle url with bottle framework'''
 from bottle import get, post, route, run, request, view, static_file
 
-from pur_doc.constant import FILES, TEMPLATE_PATH
+from pur_doc.constant import FILES, TEMPLATE_PATH, DATA_PATH
 from pur_doc.load_excel import load_excel
 from pur_doc import xls_inject, sql, word
 
@@ -23,7 +23,7 @@ def save_upload():
     if filename in FILES:
 
         # Just overwrite the file with same name
-        save_path = TEMPLATE_PATH
+        save_path = DATA_PATH
         upload.save(save_path, overwrite=True)
 
         # after excel file is uploaded, trigger the event to refresh database

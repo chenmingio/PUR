@@ -1,5 +1,5 @@
 import unittest
-from pur_doc import sql, xls_inject
+from pur_doc import sql, xls_inject, word
 
 from pur_doc.xls_inject import *
 
@@ -7,7 +7,8 @@ from pur_doc.xls_inject import *
 TEST_PROJECT = "1111E.001239"
 TEST_VENDOR = "48200025"
 TEST_PART = "230.033-00"
-TEST_PART_LIST = ['230.033-00', '230.033-10', '230.038-00', '230.038-10']
+# TEST_PART_LIST = ['230.033-00', '230.033-10', '230.038-00', '230.038-10']
+TEST_PART_LIST = ['230.033-00', '230.033-10']
 
 TEST_PROJECT2 = '1111E.001236' # MEB APS
 
@@ -29,6 +30,7 @@ class TestSum(unittest.TestCase):
         # self.assertCountEqual(sql.get_project_part_list_4sb(TEST_PROJECT2), [])
 
         # self.assertCountEqual(sql.get_project_info(TEST_PROJECT), [])
+
         # print(sql.get_project_info(TEST_PROJECT))
 
         # print(sql.get_part_general_info(TEST_PART))
@@ -59,7 +61,7 @@ class TestSum(unittest.TestCase):
 
         # print(sql.get_part_list_by_project_vendor(TEST_PROJECT, TEST_VENDOR))
 
-        print(sql.assemble_nl_info(TEST_PROJECT, TEST_VENDOR, TEST_PART_LIST))
+        # print(sql.assemble_nl_info(TEST_PROJECT, TEST_VENDOR, TEST_PART_LIST))
 
         pass
 
@@ -71,8 +73,15 @@ class TestSum(unittest.TestCase):
 
         # xls_inject_sb(TEST_PROJECT2)
 
+        pass
+
+    def test_word(self):
+
+        # test_data = sql.assemble_nl_info(TEST_PROJECT, TEST_VENDOR, TEST_PART_LIST)
+        # word.generate_nl(test_data)
 
         pass
+
 
 if __name__ == '__main__':
     unittest.main()

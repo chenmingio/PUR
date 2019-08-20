@@ -2,7 +2,7 @@ import pandas as pd
 from pandas import ExcelWriter
 from pandas import ExcelFile
 
-from pur_doc.constant import DB_URL
+from pur_doc.constant import DB_URL, DATA_PATH
 
 import sqlite3
 
@@ -12,7 +12,7 @@ CONN = sqlite3.connect(DB_URL)
 
 
 def load_excel(filename):
-    path_to_xls = './pur_doc/data/' + filename
+    path_to_xls = DATA_PATH + filename
 
     # read the excel file to dataframe
     with pd.ExcelFile(path_to_xls) as xls:
