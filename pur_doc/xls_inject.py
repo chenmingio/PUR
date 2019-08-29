@@ -21,7 +21,8 @@ def xls_inject_risk_eval(project):
     sheet = wb[sheet_name]
 
     # get the value
-    project_dict = sql.assemble_project(project)
+    part_list = sql.get_project_part_list(project)
+    project_dict = sql.assemble_project(project, part_list)
 
     # start injection
 
