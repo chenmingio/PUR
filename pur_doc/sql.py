@@ -68,19 +68,19 @@ def assemble_nl_info(project, vendor, part_list):
 
 
 
-def assemble_project(project, sb=False):
+def assemble_project(project, part_list):
 
     result = rec_dd()
     
-    result['parts'] = assemble_parts_for_project(project, sb=False)
+    result['parts'] = assemble_parts_for_project(project, part_list)
 
     result['project'] = get_project_info(project)
 
-    result['project']['part_list'] = get_project_part_list(project)
+    result['project']['part_list'] = part_list
 
-    result['project']['part_list_sb'] = get_project_part_list_sb(project)
+    # result['project']['part_list_sb'] = get_project_part_list_sb(project)
 
-    result['vendors'] = assemble_vendors(project)
+    result['vendors'] = assemble_vendors(project) # later use part_list as 2nd para, then reduce the vendors list
 
     return result
 
@@ -98,15 +98,16 @@ def assemble_vendors(project):
     return result
 
 
-def assemble_parts_for_project(project, sb=False):
-    '''get the part list for sb, assemble single part dict for each'''
+def assemble_parts_for_project(project, part_list):
+    # '''get the part list for sb, assemble single part dict for each'''
+    '''use the user chosen part_list as part list'''
 
     result = rec_dd()
 
-    if sb == False:
-        part_list = get_project_part_list(project)
-    else:
-        part_list = get_project_part_list_sb(project)
+    # if sb == False:
+    #     part_list = get_project_part_list(project)
+    # else:
+    #     part_list = get_project_part_list_sb(project)
 
     for part_id, part_number in enumerate(part_list, start=1):
         key_name = 'part_' + str(part_id)
@@ -144,6 +145,8 @@ def assemble_quotation_single_vendor(project, part, vendor):
     result['vendor'] = str(vendor)
     result['prices'] = get_quotation_yearly_info(project, part, vendor)
     result['invests'] = get_quotation_invest_info(project, part, vendor)
+    result['pvo'] = get_part_quotation_pvo(project, part, vendor)
+    result['qs'] = get_part_quotation_qs(project, part, vendor)
 
     return result
 
@@ -289,7 +292,7 @@ def get_vendor_list(project):
     cursor = CONN.cursor()
     context = (project,)
 
-    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? AND vendor_active='X' ORDER BY vendor''', context)
+    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? ORDER BY vendor''', context)
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
@@ -364,6 +367,43 @@ def get_project_part_list(project):
     return result
 
 
+def get_part_quotation_qs(project, part, vendor):
+    '''get total quick saving for a quotation'''
+
+    cursor = CONN.cursor()
+    context = (project, part, vendor)
+
+    cursor.execute(
+        '''SELECT SUM(qs) FROM nomi_part WHERE project=? AND part=? AND vendor=?''', context)
+
+    row = cursor.fetchone()
+    result = row[0] or 0
+
+    return result
+
+def get_part_quotation_pvo(project, part, vendor):
+    '''return PVO by project and part and vendor'''
+
+    cursor = CONN.cursor()
+    context = (project, part, vendor)
+
+    # get price pvo
+    cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT project, part, year, volume*price100/100 AS year_PVO FROM rfq_part NATURAL JOIN nomi_part WHERE project=? AND part=? AND vendor=?) GROUP BY year_PVO''', context)
+
+    row = cursor.fetchone()
+    part_pvo = row[0]
+
+    cursor.execute('''SELECT SUM(invest_cost) FROM (SELECT tool_cost+further_invest_cost AS invest_cost FROM nomi_invest WHERE project=? AND part=? AND vendor=?)''', context)
+
+    row = cursor.fetchone()
+    invest_pvo = row[0] or 0
+
+    # pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
+    pvo = part_pvo + invest_pvo
+
+    return int(pvo)
+
+
 def get_part_pvo(project, part):
     '''return PVO by project and part'''
 
@@ -380,7 +420,8 @@ def get_part_pvo(project, part):
     row = cursor.fetchone()
     invest_pvo = row[0] or 0
 
-    pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
+    # pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
+    pvo = part_pvo + invest_pvo
 
     return int(pvo)
 
@@ -464,7 +505,7 @@ def get_vendor_list_4part(project, part):
     context = (project, part)
 
     cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept 
-                        WHERE project=? AND part=? AND vendor_active='X' ORDER BY vendor''', context)
+                        WHERE project=? AND part=? ORDER BY vendor''', context)
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]

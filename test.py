@@ -21,7 +21,7 @@ class TestSum(unittest.TestCase):
 
     def test_sql(self):
 
-        # self.assertCountEqual(sql.get_project_part_list(TEST_PROJECT), ['230.033-00', '230.033-10', '230.038-00', '230.038-10', '178.576-49'])
+        self.assertCountEqual(sql.get_project_part_list(TEST_PROJECT), ['230.033-00', '230.033-10', '230.038-00', '230.038-10', '178.576-49'])
 
         # self.assertAlmostEqual(sql.get_part_pvo(TEST_PROJECT, TEST_PART), 5073)
 
@@ -48,6 +48,10 @@ class TestSum(unittest.TestCase):
         # print(sql.assemble_parts_for_project(TEST_PROJECT2))
 
         # print(sql.assemble_project(TEST_PROJECT2))
+
+        # print(sql.get_part_quotation_pvo(TEST_PROJECT, TEST_PART, TEST_VENDOR))
+
+        # print(sql.get_part_quotation_qs(TEST_PROJECT, TEST_PART, TEST_VENDOR))
 
         # print(sql.get_part_volume_4project(TEST_PROJECT, TEST_PART))
 

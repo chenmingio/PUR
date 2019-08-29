@@ -6,6 +6,14 @@ from pur_doc.load_excel import load_excel
 from pur_doc import xls_inject, sql, word
 
 
+# return index
+@route('/')
+@view('index.html', template_lookup=[TEMPLATE_PATH])
+def index():
+    return {}
+
+
+
 # return a page for file upload
 @route('/upload')
 @view('upload.html', template_lookup=[TEMPLATE_PATH])
@@ -27,12 +35,50 @@ def save_upload():
         upload.save(save_path, overwrite=True)
 
         # after excel file is uploaded, trigger the event to refresh database
-        load_excel(filename)
+        if 'xlsx' in filename:
+            load_excel(filename)
 
         return filename + ' updated.'
 
     else:
         return "wrong file uploaded"
+
+
+
+# return the page for NL download
+@get('/sb')
+@view('sb.html', template_lookup=[TEMPLATE_PATH])
+def sb_form():
+    return {}
+
+@post('/sb')
+@view('sb_parts.html', template_lookup=[TEMPLATE_PATH])
+def sb_parts_form():
+    project = request.forms.get('project') 
+
+    part_list = sql.get_project_part_list(project)
+
+    result = {}
+    result['part_list'] = part_list
+    result['project'] = project
+
+    return result
+
+@post('/sb/parts')
+def sb_generate():
+    ''' return xlsx file according to form request'''
+    selected_part_list = request.forms.getall('parts')
+    project = request.forms.get('project')
+
+    if 'all' in selected_part_list:
+        selected_part_list = sql.get_project_part_list(project)
+
+    xls_inject.xls_inject_sb(project, selected_part_list)
+
+    return static_file('source_ge_output.xlsx', root='./output/')
+
+
+
 
 
 # return the page for NL download

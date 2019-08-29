@@ -171,13 +171,13 @@ def xls_inject_supplier_selection(project):
         remove(name)
 
 
-def xls_inject_sb(project):
-    '''xxx'''
+def xls_inject_sb(project, part_list):
+    '''generate xlxs file according to given project and part list'''
 
     # get the input data
-    project_dict = sql.assemble_project(project, sb=True)
+    project_dict = sql.assemble_project(project, part_list)
 
-    file_name = 'test_source_ge'
+    file_name = 'source_ge'
     file_path = './pur_doc/templates/' + file_name + '.xlsx'
     sheet_name = 'Input'
 
@@ -724,21 +724,248 @@ def xls_inject_sb(project):
     # quotation area
 
     # vendor names
-    sheet['P138'] = project_dict['vendors'][part_1_vendor_1] or None
-    sheet['W138'] = project_dict['vendors'][part_1_vendor_2] or None
-    sheet['AD138'] = project_dict['vendors'][part_1_vendor_3] or None
-    sheet['BA138'] = project_dict['vendors'][part_2_vendor_1] or None
-    sheet['BH138'] = project_dict['vendors'][part_2_vendor_2] or None
-    sheet['BO138'] = project_dict['vendors'][part_2_vendor_3] or None
-    sheet['CL138'] = project_dict['vendors'][part_3_vendor_1] or None
-    sheet['CS138'] = project_dict['vendors'][part_3_vendor_2] or None
-    sheet['CZ138'] = project_dict['vendors'][part_3_vendor_3] or None
-    sheet['DW138'] = project_dict['vendors'][part_4_vendor_1] or None
-    sheet['ED138'] = project_dict['vendors'][part_4_vendor_2] or None
-    sheet['EK138'] = project_dict['vendors'][part_4_vendor_3] or None
+    sheet['P138'] = project_dict['vendors'][part_1_vendor_1]['short_name'] if part_1_vendor_1 else None
+    sheet['W138'] = project_dict['vendors'][part_1_vendor_2]['short_name'] if part_1_vendor_2 else None
+    sheet['AD138'] = project_dict['vendors'][part_1_vendor_3]['short_name'] if part_1_vendor_3 else None
+    sheet['BA138'] = project_dict['vendors'][part_2_vendor_1]['short_name'] if part_2_vendor_1 else None
+    sheet['BH138'] = project_dict['vendors'][part_2_vendor_2]['short_name'] if part_2_vendor_2 else None
+    sheet['BO138'] = project_dict['vendors'][part_2_vendor_3]['short_name'] if part_2_vendor_3 else None
+    sheet['CL138'] = project_dict['vendors'][part_3_vendor_1]['short_name'] if part_3_vendor_1 else None
+    sheet['CS138'] = project_dict['vendors'][part_3_vendor_2]['short_name'] if part_3_vendor_2 else None
+    sheet['CZ138'] = project_dict['vendors'][part_3_vendor_3]['short_name'] if part_3_vendor_3 else None
+    sheet['DW138'] = project_dict['vendors'][part_4_vendor_1]['short_name'] if part_4_vendor_1 else None
+    sheet['ED138'] = project_dict['vendors'][part_4_vendor_2]['short_name'] if part_4_vendor_2 else None
+    sheet['EK138'] = project_dict['vendors'][part_4_vendor_3]['short_name'] if part_4_vendor_3 else None
+
+    # quotation currency (use target currency cuz no quotation currency in NR actually)
+    sheet['P139'] = project_dict['parts']['part_1']['general_info']['currency'] or None
+    sheet['W139'] = project_dict['parts']['part_1']['general_info']['currency'] or None
+    sheet['AD139'] = project_dict['parts']['part_1']['general_info']['currency'] or None
+    sheet['BA139'] = project_dict['parts']['part_2']['general_info']['currency'] or None
+    sheet['BH139'] = project_dict['parts']['part_2']['general_info']['currency'] or None
+    sheet['BO139'] = project_dict['parts']['part_2']['general_info']['currency'] or None
+    sheet['CL139'] = project_dict['parts']['part_3']['general_info']['currency'] or None
+    sheet['CS139'] = project_dict['parts']['part_3']['general_info']['currency'] or None
+    sheet['CZ139'] = project_dict['parts']['part_3']['general_info']['currency'] or None
+    sheet['DW139'] = project_dict['parts']['part_4']['general_info']['currency'] or None
+    sheet['ED139'] = project_dict['parts']['part_4']['general_info']['currency'] or None
+    sheet['EK139'] = project_dict['parts']['part_4']['general_info']['currency'] or None
+
+    # so exchange rate to target quotation should be 1
+    sheet['P141'] = 1 if part_1_vendor_1 else None
+    sheet['W141'] = 1 if part_1_vendor_2 else None 
+    sheet['AD141'] = 1 if part_1_vendor_3 else None
+    sheet['BA141'] = 1 if part_2_vendor_1 else None
+    sheet['BH141'] = 1 if part_2_vendor_2 else None
+    sheet['BO141'] = 1 if part_2_vendor_3 else None
+    sheet['CL141'] = 1 if part_3_vendor_1 else None
+    sheet['CS141'] = 1 if part_3_vendor_2 else None
+    sheet['CZ141'] = 1 if part_3_vendor_3 else None
+    sheet['DW141'] = 1 if part_4_vendor_1 else None
+    sheet['ED141'] = 1 if part_4_vendor_2 else None
+    sheet['EK141'] = 1 if part_4_vendor_3 else None
+
+    # quotations
+
+    # year 1
+    sheet['P144'] = project_dict['parts']['part_1']['quotations']['vendor_1']['prices']['price100_year_1'] or None
+    sheet['W144'] = project_dict['parts']['part_1']['quotations']['vendor_2']['prices']['price100_year_1'] or None
+    sheet['AD144'] = project_dict['parts']['part_1']['quotations']['vendor_3']['prices']['price100_year_1'] or None
+    sheet['BA144'] = project_dict['parts']['part_2']['quotations']['vendor_1']['prices']['price100_year_1'] or None
+    sheet['BH144'] = project_dict['parts']['part_2']['quotations']['vendor_2']['prices']['price100_year_1'] or None
+    sheet['BO144'] = project_dict['parts']['part_2']['quotations']['vendor_3']['prices']['price100_year_1'] or None
+    sheet['CL144'] = project_dict['parts']['part_3']['quotations']['vendor_1']['prices']['price100_year_1'] or None
+    sheet['CS144'] = project_dict['parts']['part_3']['quotations']['vendor_2']['prices']['price100_year_1'] or None
+    sheet['CZ144'] = project_dict['parts']['part_3']['quotations']['vendor_3']['prices']['price100_year_1'] or None
+    sheet['DW144'] = project_dict['parts']['part_4']['quotations']['vendor_1']['prices']['price100_year_1'] or None
+    sheet['ED144'] = project_dict['parts']['part_4']['quotations']['vendor_2']['prices']['price100_year_1'] or None
+    sheet['EK144'] = project_dict['parts']['part_4']['quotations']['vendor_3']['prices']['price100_year_1'] or None
+
+    # year2
+    sheet['P145'] = project_dict['parts']['part_1']['quotations']['vendor_1']['prices']['price100_year_2'] or None
+    sheet['W145'] = project_dict['parts']['part_1']['quotations']['vendor_2']['prices']['price100_year_2'] or None
+    sheet['AD145'] = project_dict['parts']['part_1']['quotations']['vendor_3']['prices']['price100_year_2'] or None
+    sheet['BA145'] = project_dict['parts']['part_2']['quotations']['vendor_1']['prices']['price100_year_2'] or None
+    sheet['BH145'] = project_dict['parts']['part_2']['quotations']['vendor_2']['prices']['price100_year_2'] or None
+    sheet['BO145'] = project_dict['parts']['part_2']['quotations']['vendor_3']['prices']['price100_year_2'] or None
+    sheet['CL145'] = project_dict['parts']['part_3']['quotations']['vendor_1']['prices']['price100_year_2'] or None
+    sheet['CS145'] = project_dict['parts']['part_3']['quotations']['vendor_2']['prices']['price100_year_2'] or None
+    sheet['CZ145'] = project_dict['parts']['part_3']['quotations']['vendor_3']['prices']['price100_year_2'] or None
+    sheet['DW145'] = project_dict['parts']['part_4']['quotations']['vendor_1']['prices']['price100_year_2'] or None
+    sheet['ED145'] = project_dict['parts']['part_4']['quotations']['vendor_2']['prices']['price100_year_2'] or None
+    sheet['EK145'] = project_dict['parts']['part_4']['quotations']['vendor_3']['prices']['price100_year_2'] or None
+
+    # year3
+    sheet['P146'] = project_dict['parts']['part_1']['quotations']['vendor_1']['prices']['price100_year_3'] or None
+    sheet['W146'] = project_dict['parts']['part_1']['quotations']['vendor_2']['prices']['price100_year_3'] or None
+    sheet['AD146'] = project_dict['parts']['part_1']['quotations']['vendor_3']['prices']['price100_year_3'] or None
+    sheet['BA146'] = project_dict['parts']['part_2']['quotations']['vendor_1']['prices']['price100_year_3'] or None
+    sheet['BH146'] = project_dict['parts']['part_2']['quotations']['vendor_2']['prices']['price100_year_3'] or None
+    sheet['BO146'] = project_dict['parts']['part_2']['quotations']['vendor_3']['prices']['price100_year_3'] or None
+    sheet['CL146'] = project_dict['parts']['part_3']['quotations']['vendor_1']['prices']['price100_year_3'] or None
+    sheet['CS146'] = project_dict['parts']['part_3']['quotations']['vendor_2']['prices']['price100_year_3'] or None
+    sheet['CZ146'] = project_dict['parts']['part_3']['quotations']['vendor_3']['prices']['price100_year_3'] or None
+    sheet['DW146'] = project_dict['parts']['part_4']['quotations']['vendor_1']['prices']['price100_year_3'] or None
+    sheet['ED146'] = project_dict['parts']['part_4']['quotations']['vendor_2']['prices']['price100_year_3'] or None
+    sheet['EK146'] = project_dict['parts']['part_4']['quotations']['vendor_3']['prices']['price100_year_3'] or None
+
+    # year4
+    sheet['P147'] = project_dict['parts']['part_1']['quotations']['vendor_1']['prices']['price100_year_4'] or None
+    sheet['W147'] = project_dict['parts']['part_1']['quotations']['vendor_2']['prices']['price100_year_4'] or None
+    sheet['AD147'] = project_dict['parts']['part_1']['quotations']['vendor_3']['prices']['price100_year_4'] or None
+    sheet['BA147'] = project_dict['parts']['part_2']['quotations']['vendor_1']['prices']['price100_year_4'] or None
+    sheet['BH147'] = project_dict['parts']['part_2']['quotations']['vendor_2']['prices']['price100_year_4'] or None
+    sheet['BO147'] = project_dict['parts']['part_2']['quotations']['vendor_3']['prices']['price100_year_4'] or None
+    sheet['CL147'] = project_dict['parts']['part_3']['quotations']['vendor_1']['prices']['price100_year_4'] or None
+    sheet['CS147'] = project_dict['parts']['part_3']['quotations']['vendor_2']['prices']['price100_year_4'] or None
+    sheet['CZ147'] = project_dict['parts']['part_3']['quotations']['vendor_3']['prices']['price100_year_4'] or None
+    sheet['DW147'] = project_dict['parts']['part_4']['quotations']['vendor_1']['prices']['price100_year_4'] or None
+    sheet['ED147'] = project_dict['parts']['part_4']['quotations']['vendor_2']['prices']['price100_year_4'] or None
+    sheet['EK147'] = project_dict['parts']['part_4']['quotations']['vendor_3']['prices']['price100_year_4'] or None
+
+    # year5
+    sheet['P148'] = project_dict['parts']['part_1']['quotations']['vendor_1']['prices']['price100_year_5'] or None
+    sheet['W148'] = project_dict['parts']['part_1']['quotations']['vendor_2']['prices']['price100_year_5'] or None
+    sheet['AD148'] = project_dict['parts']['part_1']['quotations']['vendor_3']['prices']['price100_year_5'] or None
+    sheet['BA148'] = project_dict['parts']['part_2']['quotations']['vendor_1']['prices']['price100_year_5'] or None
+    sheet['BH148'] = project_dict['parts']['part_2']['quotations']['vendor_2']['prices']['price100_year_5'] or None
+    sheet['BO148'] = project_dict['parts']['part_2']['quotations']['vendor_3']['prices']['price100_year_5'] or None
+    sheet['CL148'] = project_dict['parts']['part_3']['quotations']['vendor_1']['prices']['price100_year_5'] or None
+    sheet['CS148'] = project_dict['parts']['part_3']['quotations']['vendor_2']['prices']['price100_year_5'] or None
+    sheet['CZ148'] = project_dict['parts']['part_3']['quotations']['vendor_3']['prices']['price100_year_5'] or None
+    sheet['DW148'] = project_dict['parts']['part_4']['quotations']['vendor_1']['prices']['price100_year_5'] or None
+    sheet['ED148'] = project_dict['parts']['part_4']['quotations']['vendor_2']['prices']['price100_year_5'] or None
+    sheet['EK148'] = project_dict['parts']['part_4']['quotations']['vendor_3']['prices']['price100_year_5'] or None
 
 
+    # price first tool
+    sheet['P151'] = project_dict['parts']['part_1']['quotations']['vendor_1']['invests']['tool_cost_tool_1'] or None
+    sheet['W151'] = project_dict['parts']['part_1']['quotations']['vendor_2']['invests']['tool_cost_tool_1'] or None
+    sheet['AD151'] = project_dict['parts']['part_1']['quotations']['vendor_3']['invests']['tool_cost_tool_1'] or None
+    sheet['BA151'] = project_dict['parts']['part_2']['quotations']['vendor_1']['invests']['tool_cost_tool_1'] or None
+    sheet['BH151'] = project_dict['parts']['part_2']['quotations']['vendor_2']['invests']['tool_cost_tool_1'] or None
+    sheet['BO151'] = project_dict['parts']['part_2']['quotations']['vendor_3']['invests']['tool_cost_tool_1'] or None
+    sheet['CL151'] = project_dict['parts']['part_3']['quotations']['vendor_1']['invests']['tool_cost_tool_1'] or None
+    sheet['CS151'] = project_dict['parts']['part_3']['quotations']['vendor_2']['invests']['tool_cost_tool_1'] or None
+    sheet['CZ151'] = project_dict['parts']['part_3']['quotations']['vendor_3']['invests']['tool_cost_tool_1'] or None
+    sheet['DW151'] = project_dict['parts']['part_4']['quotations']['vendor_1']['invests']['tool_cost_tool_1'] or None
+    sheet['ED151'] = project_dict['parts']['part_4']['quotations']['vendor_2']['invests']['tool_cost_tool_1'] or None
+    sheet['EK151'] = project_dict['parts']['part_4']['quotations']['vendor_3']['invests']['tool_cost_tool_1'] or None
+
+
+    # cavity
+    sheet['P152'] = project_dict['parts']['part_1']['quotations']['vendor_1']['invests']['cavity_tool_1'] or None
+    sheet['W152'] = project_dict['parts']['part_1']['quotations']['vendor_2']['invests']['cavity_tool_1'] or None
+    sheet['AD152'] = project_dict['parts']['part_1']['quotations']['vendor_3']['invests']['cavity_tool_1'] or None
+    sheet['BA152'] = project_dict['parts']['part_2']['quotations']['vendor_1']['invests']['cavity_tool_1'] or None
+    sheet['BH152'] = project_dict['parts']['part_2']['quotations']['vendor_2']['invests']['cavity_tool_1'] or None
+    sheet['BO152'] = project_dict['parts']['part_2']['quotations']['vendor_3']['invests']['cavity_tool_1'] or None
+    sheet['CL152'] = project_dict['parts']['part_3']['quotations']['vendor_1']['invests']['cavity_tool_1'] or None
+    sheet['CS152'] = project_dict['parts']['part_3']['quotations']['vendor_2']['invests']['cavity_tool_1'] or None
+    sheet['CZ152'] = project_dict['parts']['part_3']['quotations']['vendor_3']['invests']['cavity_tool_1'] or None
+    sheet['DW152'] = project_dict['parts']['part_4']['quotations']['vendor_1']['invests']['cavity_tool_1'] or None
+    sheet['ED152'] = project_dict['parts']['part_4']['quotations']['vendor_2']['invests']['cavity_tool_1'] or None
+    sheet['EK152'] = project_dict['parts']['part_4']['quotations']['vendor_3']['invests']['cavity_tool_1'] or None
+
+    # tool owner, default as Hella
+    sheet['P153'] = 'Hella' if part_1_vendor_1 else None
+    sheet['W153'] = 'Hella' if part_1_vendor_2 else None 
+    sheet['AD153'] = 'Hella' if part_1_vendor_3 else None
+    sheet['BA153'] = 'Hella' if part_2_vendor_1 else None
+    sheet['BH153'] = 'Hella' if part_2_vendor_2 else None
+    sheet['BO153'] = 'Hella' if part_2_vendor_3 else None
+    sheet['CL153'] = 'Hella' if part_3_vendor_1 else None
+    sheet['CS153'] = 'Hella' if part_3_vendor_2 else None
+    sheet['CZ153'] = 'Hella' if part_3_vendor_3 else None
+    sheet['DW153'] = 'Hella' if part_4_vendor_1 else None
+    sheet['ED153'] = 'Hella' if part_4_vendor_2 else None
+    sheet['EK153'] = 'Hella' if part_4_vendor_3 else None
+
+    # price additonal invest
+    sheet['P155'] = project_dict['parts']['part_1']['quotations']['vendor_1']['invests']['further_invest_cost_tool_1'] or None
+    sheet['W155'] = project_dict['parts']['part_1']['quotations']['vendor_2']['invests']['further_invest_cost_tool_1'] or None
+    sheet['AD155'] = project_dict['parts']['part_1']['quotations']['vendor_3']['invests']['further_invest_cost_tool_1'] or None
+    sheet['BA155'] = project_dict['parts']['part_2']['quotations']['vendor_1']['invests']['further_invest_cost_tool_1'] or None
+    sheet['BH155'] = project_dict['parts']['part_2']['quotations']['vendor_2']['invests']['further_invest_cost_tool_1'] or None
+    sheet['BO155'] = project_dict['parts']['part_2']['quotations']['vendor_3']['invests']['further_invest_cost_tool_1'] or None
+    sheet['CL155'] = project_dict['parts']['part_3']['quotations']['vendor_1']['invests']['further_invest_cost_tool_1'] or None
+    sheet['CS155'] = project_dict['parts']['part_3']['quotations']['vendor_2']['invests']['further_invest_cost_tool_1'] or None
+    sheet['CZ155'] = project_dict['parts']['part_3']['quotations']['vendor_3']['invests']['further_invest_cost_tool_1'] or None
+    sheet['DW155'] = project_dict['parts']['part_4']['quotations']['vendor_1']['invests']['further_invest_cost_tool_1'] or None
+    sheet['ED155'] = project_dict['parts']['part_4']['quotations']['vendor_2']['invests']['further_invest_cost_tool_1'] or None
+    sheet['EK155'] = project_dict['parts']['part_4']['quotations']['vendor_3']['invests']['further_invest_cost_tool_1'] or None
+
+    # price copy tool
+    sheet['P156'] = project_dict['parts']['part_1']['quotations']['vendor_1']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['W156'] = project_dict['parts']['part_1']['quotations']['vendor_2']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['AD156'] = project_dict['parts']['part_1']['quotations']['vendor_3']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['BA156'] = project_dict['parts']['part_2']['quotations']['vendor_1']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['BH156'] = project_dict['parts']['part_2']['quotations']['vendor_2']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['BO156'] = project_dict['parts']['part_2']['quotations']['vendor_3']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['CL156'] = project_dict['parts']['part_3']['quotations']['vendor_1']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['CS156'] = project_dict['parts']['part_3']['quotations']['vendor_2']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['CZ156'] = project_dict['parts']['part_3']['quotations']['vendor_3']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['DW156'] = project_dict['parts']['part_4']['quotations']['vendor_1']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['ED156'] = project_dict['parts']['part_4']['quotations']['vendor_2']['invests']['copy_tool_cost_tool_1'] or None
+    sheet['EK156'] = project_dict['parts']['part_4']['quotations']['vendor_3']['invests']['copy_tool_cost_tool_1'] or None
+
+    # quotation pvo
+    sheet['P160'] = project_dict['parts']['part_1']['quotations']['vendor_1']['pvo'] or None
+    sheet['W160'] = project_dict['parts']['part_1']['quotations']['vendor_2']['pvo'] or None
+    sheet['AD160'] = project_dict['parts']['part_1']['quotations']['vendor_3']['pvo'] or None
+    sheet['BA160'] = project_dict['parts']['part_2']['quotations']['vendor_1']['pvo'] or None
+    sheet['BH160'] = project_dict['parts']['part_2']['quotations']['vendor_2']['pvo'] or None
+    sheet['BO160'] = project_dict['parts']['part_2']['quotations']['vendor_3']['pvo'] or None
+    sheet['CL160'] = project_dict['parts']['part_3']['quotations']['vendor_1']['pvo'] or None
+    sheet['CS160'] = project_dict['parts']['part_3']['quotations']['vendor_2']['pvo'] or None
+    sheet['CZ160'] = project_dict['parts']['part_3']['quotations']['vendor_3']['pvo'] or None
+    sheet['DW160'] = project_dict['parts']['part_4']['quotations']['vendor_1']['pvo'] or None
+    sheet['ED160'] = project_dict['parts']['part_4']['quotations']['vendor_2']['pvo'] or None
+    sheet['EK160'] = project_dict['parts']['part_4']['quotations']['vendor_3']['pvo'] or None
+
+
+    # target PVO - actual PVO
+    sheet['P161'] = (project_dict['parts']['part_1']['quotations']['vendor_1']['pvo'] - project_dict['parts']['part_1']['general_info']['pvo']) if part_1_vendor_1 else None
+    sheet['W161'] = (project_dict['parts']['part_1']['quotations']['vendor_2']['pvo'] - project_dict['parts']['part_1']['general_info']['pvo']) if part_1_vendor_2 else None
+    sheet['AD161'] = (project_dict['parts']['part_1']['quotations']['vendor_3']['pvo'] - project_dict['parts']['part_1']['general_info']['pvo']) if part_1_vendor_3 else None
+    sheet['BA161'] = (project_dict['parts']['part_2']['quotations']['vendor_1']['pvo'] - project_dict['parts']['part_2']['general_info']['pvo']) if part_2_vendor_1 else None
+    sheet['BH161'] = (project_dict['parts']['part_2']['quotations']['vendor_2']['pvo'] - project_dict['parts']['part_2']['general_info']['pvo']) if part_2_vendor_2 else None
+    sheet['BO161'] = (project_dict['parts']['part_2']['quotations']['vendor_3']['pvo'] - project_dict['parts']['part_2']['general_info']['pvo']) if part_2_vendor_3 else None
+    sheet['CL161'] = (project_dict['parts']['part_3']['quotations']['vendor_1']['pvo'] - project_dict['parts']['part_3']['general_info']['pvo']) if part_3_vendor_1 else None
+    sheet['CS161'] = (project_dict['parts']['part_3']['quotations']['vendor_2']['pvo'] - project_dict['parts']['part_3']['general_info']['pvo']) if part_3_vendor_2 else None
+    sheet['CZ161'] = (project_dict['parts']['part_3']['quotations']['vendor_3']['pvo'] - project_dict['parts']['part_3']['general_info']['pvo']) if part_3_vendor_3 else None
+    sheet['DW161'] = (project_dict['parts']['part_4']['quotations']['vendor_1']['pvo'] - project_dict['parts']['part_4']['general_info']['pvo']) if part_4_vendor_1 else None
+    sheet['ED161'] = (project_dict['parts']['part_4']['quotations']['vendor_2']['pvo'] - project_dict['parts']['part_4']['general_info']['pvo']) if part_4_vendor_2 else None
+    sheet['EK161'] = (project_dict['parts']['part_4']['quotations']['vendor_3']['pvo'] - project_dict['parts']['part_4']['general_info']['pvo']) if part_4_vendor_3 else None
+
+    # capacity check
+    sheet['D188'] = project_dict['project']['sop_hella_date'][0:4] if part_1_vendor_1 else None
+    sheet['AY188'] = project_dict['project']['sop_hella_date'][0:4] if part_2_vendor_1 else None
+    sheet['CT188'] = project_dict['project']['sop_hella_date'][0:4] if part_3_vendor_1 else None
+    sheet['EO188'] = project_dict['project']['sop_hella_date'][0:4] if part_4_vendor_1 else None
+
+    sheet['F188'] = project_dict['project']['year_1_volume'] or None
+    sheet['F189'] = project_dict['project']['year_2_volume'] or None
+    sheet['F190'] = project_dict['project']['year_3_volume'] or None
+    sheet['F191'] = project_dict['project']['year_4_volume'] or None
+    sheet['F192'] = project_dict['project']['year_5_volume'] or None
+    sheet['F193'] = project_dict['project']['year_6_volume'] or None
+    sheet['F194'] = project_dict['project']['year_7_volume'] or None
+    sheet['F195'] = project_dict['project']['year_8_volume'] or None
+    sheet['F196'] = project_dict['project']['year_9_volume'] or None
+    sheet['F197'] = project_dict['project']['year_10_volume'] or None
+
+
+    # Team Decision Name
+    sheet['K226'] = project_dict['project']['pur'] or None
+    sheet['K227'] = project_dict['project']['pjm'] or None
+    sheet['K228'] = project_dict['parts']['part_1']['general_info']['mgs'] or None
+    sheet['K229'] = project_dict['project']['controlling'] or None
+    sheet['K230'] = project_dict['project']['sqa'] or None
+    sheet['K231'] = project_dict['project']['md'] or None
+    sheet['K233'] = project_dict['project']['log'] or None
+    sheet['K234'] = project_dict['project']['me'] or None
 
 
     # save the inject
-    wb.save(file_name + '_output.xlsx')
+    wb.save('./output/' + file_name + '_output.xlsx')
