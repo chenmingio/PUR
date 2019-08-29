@@ -9,8 +9,10 @@ TEST_VENDOR = "48200025"
 TEST_PART = "230.033-00"
 # TEST_PART_LIST = ['230.033-00', '230.033-10', '230.038-00', '230.038-10']
 TEST_PART_LIST = ['230.033-00', '230.033-10']
+TEST_PROJECT_LIST = ['1111E.001377', '1111E.000545', '1111E.000726', '1111E.000903', '1111E.001043', '1111E.001125', '1111E.001236', '1111E.001354', '1111K.000030', '1111K.000167', '1111P.000069', '1111E.000590']
 
 TEST_PROJECT2 = '1111E.001236' # MEB APS
+TEST_PROJECT3 = '1111E.000590' # MEB APS
 
 TEST_DICT = {'parts': {'part_1': {'general_info': {'project': '1111E.001236', 'nr_id': 926, 'part': '191.674-01', 'part_description': 'STECKER GEHAEUSE MONT-GR', 'mtl_group': 'TECH_PLAS', 'raw_mtl': 'PA66 GF40', 'currency': 'CNY', 'risk_level': 'L', 'buyer': 'CHENMI20', 'mgs': 'tbd', 'mgm': 'tbd', 'sqe':
 'tbd'}, 'yearly_info': {'volume_year_1': 1330, 'target_price100_year_1': 376.0, 'volume_year_2': 133894, 'target_price100_year_2': 364.72, 'volume_year_3': 294866, 'target_price100_year_3': 353.78, 'volume_year_4': 419310, 'target_price100_year_4': 343.17, 'volume_year_5': 571512, 'target_price100_year_5': 343.17, 'volume_year_6': 66529, 'target_price100_year_6': 343.17, 'volume_year_7': 804498, 'target_price100_year_7': 343.17, 'volume_year_8': 957062, 'target_price100_year_8': 343.17, 'volume_year_9': 658493, 'target_price100_year_9': 343.17}, 'invest_target': {'project_tool_1':
@@ -21,7 +23,7 @@ class TestSum(unittest.TestCase):
 
     def test_sql(self):
 
-        self.assertCountEqual(sql.get_project_part_list(TEST_PROJECT), ['230.033-00', '230.033-10', '230.038-00', '230.038-10', '178.576-49'])
+        # self.assertCountEqual(sql.get_project_part_list(TEST_PROJECT), ['230.033-00', '230.033-10', '230.038-00', '230.038-10', '178.576-49'])
 
         # self.assertAlmostEqual(sql.get_part_pvo(TEST_PROJECT, TEST_PART), 5073)
 
@@ -37,7 +39,7 @@ class TestSum(unittest.TestCase):
 
         # print(sql.get_part_volume_4project(TEST_PROJECT, TEST_PART))
 
-        # print(sql.get_vendor_info(TEST_VENDOR))
+        print(sql.get_vendor_info('49100027'))
 
         # print(sql.get_part_year_info(TEST_PROJECT, TEST_PART))
 
@@ -66,6 +68,19 @@ class TestSum(unittest.TestCase):
         # print(sql.get_part_list_by_project_vendor(TEST_PROJECT, TEST_VENDOR))
 
         # print(sql.assemble_nl_info(TEST_PROJECT, TEST_VENDOR, TEST_PART_LIST))
+
+        # loop over project lists for batch unit test
+
+        # for project in TEST_PROJECT_LIST:
+        #     part_list = sql.get_project_part_list(project)
+        #     inject_data = sql.assemble_project(project, part_list)
+        #     print(inject_data)
+
+            # vendor_list = sql.get_vendor_list(project)
+            # for vendor in vendor_list:
+            #     part_list = sql.get_part_list_by_project_vendor(project, vendor) 
+            #     inject_data = sql.assemble_nl_info(project, vendor, part_list)
+            #     print(inject_data)
 
         pass
 

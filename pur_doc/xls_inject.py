@@ -107,7 +107,8 @@ def xls_inject_supplier_selection(project):
     '''xxx'''
 
     # get the input data
-    project_dict = sql.assemble_project(project)
+    part_list = sql.get_project_part_list(project)
+    project_dict = sql.assemble_project(project, part_list)
 
     file_name = 'supplier_selection'
     file_path = TEMPLATE_PATH + file_name + '.xlsx'
@@ -176,6 +177,7 @@ def xls_inject_sb(project, part_list):
 
     # get the input data
     project_dict = sql.assemble_project(project, part_list)
+    print(project_dict)
 
     file_name = 'source_ge'
     file_path = './pur_doc/templates/' + file_name + '.xlsx'
