@@ -79,8 +79,6 @@ def sb_generate():
 
 
 
-
-
 # return the page for NL download
 @get('/nl')
 @view('nl.html', template_lookup=[TEMPLATE_PATH])
@@ -120,17 +118,36 @@ def nomination_generate():
 
 
 @get('/re')
-@view('risk_eval.html', template_lookup=[TEMPLATE_PATH])
+@view('re.html', template_lookup=[TEMPLATE_PATH])
 def risk_eval_get():
     return {}
 
-
 @post('/re')
-def risk_eval_post():
-    '''return risk eval xlsx file'''
+@view('re_parts.html', template_lookup=[TEMPLATE_PATH])
+def risk_eval_parts():
+    '''return parts for selection'''
+    project = request.forms.get('project') 
 
+    part_list = sql.get_project_part_list(project)
+
+    result = {}
+    result['part_list'] = part_list
+    result['project'] = project
+
+    return result
+
+@post('/re/parts')
+def risk_eval_generation():
+    ''' return risk evaluation file according to form request'''
+    selected_part_list = request.forms.getall('parts')
     project = request.forms.get('project')
-    xls_inject.xls_inject_risk_eval(project)
+
+    if 'all' in selected_part_list:
+        selected_part_list = sql.get_project_part_list(project)
+    
+    print(selected_part_list)
+
+    xls_inject.xls_inject_risk_eval(project, selected_part_list)
 
     return static_file('risk_eval_output.xlsx', root='./output/')
     

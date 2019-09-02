@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+    <h1>Rish Evaluation Download</h1>
+
+    <div>
+        <form action="/re/parts" method="POST">
+            <div>
+                <label for="project">Project</label>
+                <input type="text" name="project" value="{{ project }}" readonly>
+
+            </div>
+
+            <br>
+    <h3>Select parts you need. Hold Control key for multi selection.</h3>
+            <br>
+            <div>
+                <select multiple size="6" name="parts">
+                    <option value="all">select all</option>
+                    % for part in part_list:
+                    <option value="{{ part }}">{{ part }}</option>
+                    % end
+                </select>
+            </div>
+
+            <input value="download" type="submit" />
+        </form>
+    </div>
+</body>
+
+</html>

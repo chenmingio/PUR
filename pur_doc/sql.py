@@ -25,10 +25,12 @@ def dict_factory_single_row(cursor, row):
     for id_num, col in enumerate(cursor.description):
         if row:
             _value = row[id_num] 
-            result[col[0]] = _value
+            if _value:
+                result[col[0]] = _value
+            else:
+                result[col[0]] = "Undefined"
         else:
-            result[col[0]] = "Not Available."
-            # print(col[0])
+            result[col[0]] = "Undefined"
 
     return result
 
@@ -61,7 +63,7 @@ def assemble_nl_info(project, vendor, part_list):
 
     for id, part in enumerate(part_list, start=1):
         quotation['part_' + str(id)] = assemble_quotation_single_vendor(project, part, vendor)
-        part_info['part_' + str(id)] = get_part_general_info(part)
+        part_info['part_' + str(id)] = get_part_general_info(project, part)
         volume_in_1000['part_' + str(id)] = get_part_volume_in1000(project, part)
         volume_in_week['part_' + str(id)] = get_part_volume_inweek(project, part, vendor)
         invest['part_' + str(id)] = get_part_invest_target(project, part)
@@ -86,8 +88,6 @@ def assemble_project(project, part_list):
 
     result['project']['part_list'] = part_list
 
-    # result['project']['part_list_sb'] = get_project_part_list_sb(project)
-
     result['vendors'] = assemble_vendors(project) # later use part_list as 2nd para, then reduce the vendors list
 
     return result
@@ -107,15 +107,9 @@ def assemble_vendors(project):
 
 
 def assemble_parts_for_project(project, part_list):
-    # '''get the part list for sb, assemble single part dict for each'''
     '''use the user chosen part_list as part list'''
 
     result = rec_dd()
-
-    # if sb == False:
-    #     part_list = get_project_part_list(project)
-    # else:
-    #     part_list = get_project_part_list_sb(project)
 
     for part_id, part_number in enumerate(part_list, start=1):
         key_name = 'part_' + str(part_id)
@@ -129,21 +123,23 @@ def assemble_single_part(project, part):
 
     result = rec_dd()
 
-    # print(project, part)
-    result['general_info'] = get_part_general_info(part)
+    result['general_info'] = get_part_general_info(project, part)
     result['volume'] = get_part_volume(project, part)
     result['target_price'] = get_part_target_price(project, part)
     result['invest_target'] = get_part_invest_target(project, part)
+    result['timing'] = get_part_timing(project, part)
+    result['vendor_list'] = get_vendor_list_4part(project, part)
+    result['vendor_dict'] = get_vendor_by_part_in_dict(project, part)
 
+    # sovle volume exception:   
     if result['general_info'] and result['volume']:
 
         result['general_info']['part_life_time'] = len(result['volume'])
-        result['general_info']['volume_avg'] = sum(result['volume'].values()) / result['general_info']['part_life_time']
+        result['general_info']['volume_avg'] = int(sum(result['volume'].values()) / result['general_info']['part_life_time'])
         result['general_info']['target_price100_EUR'] = result['target_price']['target_price100_year_1'] / EX_RATE['EUR'] #result['general_info']['currency']]
         result['general_info']['pvo'] = get_part_pvo(project, part)
 
     result['quotations'] = assemble_quotation_single_part(project, part)
-    # result['nominated_vendor'] = get_nominated_vendor(project, part)
 
     return result
 
@@ -201,13 +197,13 @@ def get_part_volume_inweek(project, part, vendor):
 
         result = dict_factory_multi(cursor, rows, 'y')
 
-        return(result)
+        return result
 
     else:
 
         print("No weeks_per_year info for this vendor")
-
-        return None
+        _ = rec_dd()
+        return _
 
 
 def get_part_volume_in1000(project, part):
@@ -274,15 +270,15 @@ def get_part_invest_target(project, part):
 
 
 
-def get_part_general_info(part):
+def get_part_general_info(project, part):
     '''return a dictionary with titles and values about part general info
     (eg. part_description/mtl_group/etc) based on single part number (not project info involved)'''
 
     cursor = CONN.cursor()
-    context = (part,)
+    context = (project, part)
 
     cursor.execute('''SELECT DISTINCT * FROM part_data AS pd LEFT JOIN mgs USING(mtl_group)
-                   WHERE pd.part=?''', context)
+                   WHERE pd.project=? AND pd.part=?''', context)
 
     row = cursor.fetchone()
 
@@ -350,7 +346,6 @@ def get_vendor_info(vendor):
     WHERE vendor=?''', context)
 
     row = cursor.fetchone()
-    # print(row)
 
     result = dict_factory_single_row(cursor, row)
     return result
@@ -362,26 +357,24 @@ def get_project_info(project):
     context = (project,)
 
     cursor.execute(
-        '''SELECT * FROM project_info LEFT JOIN project_data USING (project) 
+        '''SELECT * FROM project_data LEFT JOIN project_info USING (project) 
             LEFT JOIN plant USING (plant) WHERE project=?''', context)
 
     # return one row
     row = cursor.fetchone()
 
-    if row:
-        result = dict_factory_single_row(cursor, row)
-        return result
-    return {}
+    result = dict_factory_single_row(cursor, row)
+    return result
 
 
 def get_project_part_list(project):
-    '''given a project, return a list with all parts'''
+    '''given a project, return a list with all parts by search the part_data sheet'''
 
     cursor = CONN.cursor()
     context = (project, )
 
     cursor.execute(
-        '''SELECT DISTINCT part FROM sourcing_concept WHERE project=? ORDER BY part''', context)
+        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''', context)
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
@@ -414,13 +407,11 @@ def get_part_quotation_pvo(project, part, vendor):
 
     row = cursor.fetchone()
 
-    # print('quotation row1: ' + str(row))
     part_pvo = row[0] if row[0] else 0
 
     cursor.execute('''SELECT SUM(invest_cost) FROM (SELECT tool_cost+further_invest_cost AS invest_cost FROM nomi_invest WHERE project=? AND part=? AND vendor=?)''', context)
 
     row = cursor.fetchone()
-    # print('quotation row2: ' + str(row))
 
     invest_pvo = row[0] if row[0] else 0
 
@@ -439,17 +430,13 @@ def get_part_pvo(project, part):
     cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
-    # print('part pvo row1: ' + str(row))
     part_pvo = row[0] if row else 0
-    # print(part_pvo)
 
     cursor.execute('''SELECT SUM(invest_target) FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
-    # print('part pvo row2: ' + str(row))
 
     invest_pvo = row[0] if row else 0
-    # print(invest_pvo)
 
     # pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
     pvo = part_pvo + invest_pvo
@@ -457,14 +444,14 @@ def get_part_pvo(project, part):
     return int(pvo)
 
 
-def get_part_risk(part):
+def get_part_risk(project, part):
     '''get risk level'''
 
     cursor = CONN.cursor()
-    context = (part,)
+    context = (project, part)
 
     cursor.execute(
-        '''SELECT risk_level FROM part_data WHERE part=?''', context)
+        '''SELECT risk_level FROM part_data WHERE project=? AND part=?''', context)
 
     row = cursor.fetchone()
 
@@ -479,7 +466,7 @@ def get_project_part_list_sb(project):
     parts_sb = []
 
     for part in all_parts:
-        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD or get_part_risk(part) == 'H'):
+        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD or get_part_risk(project, part) == 'H'):
             parts_sb.append(part)
 
     return parts_sb
@@ -564,3 +551,29 @@ def get_part_list_by_project_vendor(project, vendor):
     result = [row[0] for row in rows]
 
     return result
+
+def get_part_timing(project, part):
+    '''get all fields from project timing sheet'''
+
+    cursor = CONN.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT * FROM project_timing 
+                        WHERE project=? AND part=? ORDER BY part''', context)
+
+    row = cursor.fetchone()
+    result = dict_factory_single_row(cursor, row)
+
+    return result
+
+def get_vendor_by_part_in_dict(project, part):
+    '''xxx'''
+
+    result = rec_dd()
+
+    vendor_list = get_vendor_list_4part(project, part)
+    for id, vendor in enumerate(vendor_list, start=1):
+        result['vendor_' + str(id)] = vendor_list[id - 1]
+
+    return result
+
