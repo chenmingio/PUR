@@ -183,8 +183,9 @@ def get_part_volume_inweek(project, part, vendor):
               WHERE VP.vendor=?''', context)
 
     row = cursor.fetchone()
+    # print(row)
 
-    if row:
+    if row[0]:
 
         wpy = float(row[0])
 
@@ -338,12 +339,13 @@ def get_vendor_info(vendor):
     cursor = CONN.cursor()
     context = (vendor,)
 
-    cursor.execute('''SELECT * FROM vendor_basic AS VB
-    NATURAL JOIN vendor_contact AS VC 
-    NATURAL JOIN contract AS C
-    NATURAL JOIN quality AS Q
-    NATURAL JOIN vendor_production AS P
-    WHERE vendor=?''', context)
+    cursor.execute('''SELECT * FROM 
+    vendor_contact AS VC
+    LEFT JOIN vendor_basic AS VB ON VC.vendor=VB.vendor 
+    LEFT JOIN contract AS C ON VC.vendor=C.vendor
+    LEFT JOIN quality AS Q ON VC.vendor=Q.vendor
+    LEFT JOIN vendor_production AS P on VC.vendor=P.vendor
+    WHERE VC.vendor=?''', context)
 
     row = cursor.fetchone()
 
@@ -430,13 +432,13 @@ def get_part_pvo(project, part):
     cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
-    part_pvo = row[0] if row else 0
+    part_pvo = row[0] if row[0] else 0
 
     cursor.execute('''SELECT SUM(invest_target) FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
 
-    invest_pvo = row[0] if row else 0
+    invest_pvo = row[0] if row[0] else 0
 
     # pvo = (part_pvo + invest_pvo) / EX_RATE['EUR']
     pvo = part_pvo + invest_pvo

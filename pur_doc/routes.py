@@ -166,3 +166,20 @@ def supplier_selection_post():
     xls_inject.xls_inject_supplier_selection(project)
 
     return static_file('ss.zip', root='./output/')
+
+
+@get('/cbd')
+@view('cbd.html', template_lookup=[TEMPLATE_PATH])
+def cbd_get():
+    '''get cbd start page'''
+    return {}
+
+
+@post('/cbd')
+def cbd_post():
+    '''return cbd xlsx file zip'''
+
+    project = request.forms.get('project')
+    xls_inject.xls_inject_cbd(project)
+
+    return static_file('cbd.zip', root='./output/')

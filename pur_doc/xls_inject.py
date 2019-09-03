@@ -4,6 +4,7 @@ from openpyxl import load_workbook
 from pur_doc import sql, constant
 TEMPLATE_PATH = constant.TEMPLATE_PATH
 EX_RATE = constant.EX_RATE
+CBD_SHEET_PASSWORD = constant.cbd_sheet_password
 
 from os import remove
 
@@ -119,6 +120,103 @@ def xls_inject_risk_eval(project, part_list):
     # save the inject
     wb.save('./output/' + file_name + '_output.xlsx')
 
+def xls_inject_cbd(project):
+    '''output CBD in zip file'''
+
+    # get the input data
+    part_list = sql.get_project_part_list(project)
+    project_dict = sql.assemble_project(project, part_list)
+
+    file_name = 'cbd'
+    file_path = TEMPLATE_PATH + file_name + '.xlsx'
+    sheet_name = 'CBD Summary'
+
+    # load workbook into openpyxl
+    wb = load_workbook(file_path)
+
+    # load the sheet
+    sheet = wb[sheet_name]
+
+    part_qty = len(project_dict['project']['part_list'])
+    
+    output_file_list = []
+
+    for n in range(1, part_qty +1):
+
+        # start injection
+
+        part_n = 'part_' + str(n)
+        part = project_dict['project']['part_list'][n - 1]
+        part_description = project_dict['parts'][part_n]['general_info']['part_description'] or None
+        currency = project_dict['parts'][part_n]['general_info']['currency'] or None
+        mtl_group = project_dict['parts'][part_n]['general_info']['mtl_group'] or None
+        
+        project = project_dict['project']['project'] or None
+        project_name = project_dict['project']['project_name'] or None
+        sop_date = project_dict['project']['sop'] or None
+
+        year_1_volume = project_dict['parts'][part_n]['volume']['volume_year_1'] or 0
+        year_2_volume = project_dict['parts'][part_n]['volume']['volume_year_2'] or 0
+        year_3_volume = project_dict['parts'][part_n]['volume']['volume_year_3'] or 0
+        year_4_volume = project_dict['parts'][part_n]['volume']['volume_year_4'] or 0
+        year_5_volume = project_dict['parts'][part_n]['volume']['volume_year_5'] or 0
+        year_6_volume = project_dict['parts'][part_n]['volume']['volume_year_6'] or 0
+        year_7_volume = project_dict['parts'][part_n]['volume']['volume_year_7'] or 0
+        year_8_volume = project_dict['parts'][part_n]['volume']['volume_year_8'] or 0
+        year_9_volume = project_dict['parts'][part_n]['volume']['volume_year_9'] or 0
+        year_10_volume = project_dict['parts'][part_n]['volume']['volume_year_10'] or 0
+        year_11_volume = project_dict['parts'][part_n]['volume']['volume_year_11'] or 0
+
+        vendor_list = project_dict['parts'][part_n]['vendor_list']
+
+        for vendor in vendor_list:
+
+            sheet['D5'] = part
+            sheet['I5'] = part_description
+            sheet['L7'] = vendor
+            sheet['O7'] = project_dict['vendors'][vendor]['vendor_name'] or None
+
+            sheet['D9'] = project_name
+            sheet['I9'] = project
+
+            sheet['O9'] = currency
+            sheet['L11'] = mtl_group
+
+            sheet['I11'] = sop_date
+
+            sheet['E15'] = int(sop_date[6:10]) if sop_date else None
+
+            sheet['E16'] = year_1_volume
+            sheet['F16'] = year_2_volume
+            sheet['G16'] = year_3_volume
+            sheet['H16'] = year_4_volume
+            sheet['I16'] = year_5_volume
+            sheet['J16'] = year_6_volume
+            sheet['K16'] = year_7_volume
+            sheet['L16'] = year_8_volume
+            sheet['M16'] = year_9_volume
+            sheet['N16'] = year_10_volume
+            sheet['O16'] = year_11_volume
+
+
+            # save the inject
+            outout_file_name = './output/' + 'CBD' + '_' + project + '_' + part + '_' + vendor + '_000' + '.xlsx'
+            ws = wb.active
+            ws.protection.password = CBD_SHEET_PASSWORD
+            ws.protection.enable()
+            wb.save(outout_file_name)
+            output_file_list.append(outout_file_name)
+
+    # zip the output files
+    with zipfile.ZipFile('./output/cbd.zip', 'w') as new_zip:
+        for name in output_file_list:
+            new_zip.write(name)
+
+    # remove the excel files
+    for name in output_file_list:
+        remove(name)
+
+
 
 def xls_inject_supplier_selection(project):
     '''output supplier selection in zip file'''
@@ -127,7 +225,6 @@ def xls_inject_supplier_selection(project):
     part_list = sql.get_project_part_list(project)
     project_dict = sql.assemble_project(project, part_list)
 
-    print(project_dict)
 
     file_name = 'supplier_selection'
     file_path = TEMPLATE_PATH + file_name + '.xlsx'
@@ -148,12 +245,12 @@ def xls_inject_supplier_selection(project):
         # start injection
 
         part_n = 'part_' + str(n)
-        part = (project_dict['project']['part_list'][n - 1])
+        part = project_dict['project']['part_list'][n - 1]
 
         sheet['E6'] = project_dict['project']['project_name'] or None
         sheet['K6'] = project_dict['project']['project'] or None
 
-        sheet['E8'] = project_dict['parts'][part_n]['general_info']['part'] or None # may change to part
+        sheet['E8'] = part
         sheet['K8'] = project_dict['parts'][part_n]['general_info']['part_description'] or None
 
         sheet['K10'] = project_dict['parts'][part_n]['general_info']['mtl_group'] or None
@@ -258,6 +355,7 @@ def xls_inject_sb(project, part_list):
 
     # get the input data
     project_dict = sql.assemble_project(project, part_list)
+    print(project_dict)
 
     file_name = 'source_ge'
     file_path = './pur_doc/templates/' + file_name + '.xlsx'
@@ -270,6 +368,11 @@ def xls_inject_sb(project, part_list):
     sheet = wb[sheet_name]
 
     # start the injection
+
+    part_1 = project_dict['parts']['part_1']['general_info']['part'] or None
+    part_2 = project_dict['parts']['part_2']['general_info']['part'] or None
+    part_3 = project_dict['parts']['part_3']['general_info']['part'] or None
+    part_4 = project_dict['parts']['part_4']['general_info']['part'] or None
     
     sheet['H3'] = project_dict['project']['project'] or None
     sheet['H4'] = project_dict['project']['project_name'] or None
@@ -299,10 +402,10 @@ def xls_inject_sb(project, part_list):
     sheet['F18'] = project_dict['project']['sop_hella_date'][0:10]or None
     sheet['F19'] = project_dict['project']['sop_customer_date'][0:10] or None
 
-    sheet['F24'] = project_dict['parts']['part_1']['general_info']['part'] or None
-    sheet['L24'] = project_dict['parts']['part_2']['general_info']['part'] or None
-    sheet['R24'] = project_dict['parts']['part_3']['general_info']['part'] or None
-    sheet['X24'] = project_dict['parts']['part_4']['general_info']['part'] or None
+    sheet['F24'] = part_1
+    sheet['L24'] = part_2
+    sheet['R24'] = part_3
+    sheet['X24'] = part_4
 
     sheet['F25'] = project_dict['parts']['part_1']['general_info']['part_description'] or None
     sheet['L25'] = project_dict['parts']['part_2']['general_info']['part_description'] or None
@@ -319,10 +422,10 @@ def xls_inject_sb(project, part_list):
     sheet['F45'] = project_dict['parts']['part_3']['general_info']['part_description'] or None
     sheet['F46'] = project_dict['parts']['part_4']['general_info']['part_description'] or None
 
-    sheet['K43'] = project_dict['parts']['part_1']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_4']['general_info']['part'] else None
-    sheet['K43'] = project_dict['parts']['part_2']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_4']['general_info']['part'] else None
-    sheet['K43'] = project_dict['parts']['part_3']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_4']['general_info']['part'] else None
-    sheet['K43'] = project_dict['parts']['part_4']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_4']['general_info']['part'] else None
+    sheet['K43'] = project_dict['parts']['part_1']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_1']['general_info']['pvo'] else None
+    sheet['K43'] = project_dict['parts']['part_2']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_2']['general_info']['pvo'] else None 
+    sheet['K43'] = project_dict['parts']['part_3']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_3']['general_info']['pvo'] else None 
+    sheet['K43'] = project_dict['parts']['part_4']['general_info']['pvo'] * 1000 * EX_RATE['EUR'] if project_dict['parts']['part_4']['general_info']['pvo'] else None 
 
     sheet['S43'] = project_dict['parts']['part_1']['general_info']['currency'] or None
     sheet['S44'] = project_dict['parts']['part_2']['general_info']['currency'] or None
