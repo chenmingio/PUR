@@ -80,13 +80,13 @@ def xls_inject_risk_eval(project, part_list):
     sheet['N10'] = plant if part_5 else None
 
     # PPAP date = C sample date
-    sheet['F11'] = project_dict['parts']['part_1']['timing']['ppap_date'][0:10] if part_1 else None
-    sheet['H11'] = project_dict['parts']['part_2']['timing']['ppap_date'][0:10] if part_2 else None
-    sheet['J11'] = project_dict['parts']['part_3']['timing']['ppap_date'][0:10] if part_3 else None
-    sheet['L11'] = project_dict['parts']['part_4']['timing']['ppap_date'][0:10] if part_4 else None
-    sheet['N11'] = project_dict['parts']['part_5']['timing']['ppap_date'][0:10] if part_5 else None
+    sheet['F11'] = (project_dict['parts']['part_1']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_1']['timing']['ppap_date'][0:4]) if part_1 else None
+    sheet['H11'] = (project_dict['parts']['part_2']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_2']['timing']['ppap_date'][0:4]) if part_2 else None
+    sheet['J11'] = (project_dict['parts']['part_3']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_3']['timing']['ppap_date'][0:4]) if part_3 else None
+    sheet['L11'] = (project_dict['parts']['part_4']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_4']['timing']['ppap_date'][0:4]) if part_4 else None
+    sheet['N11'] = (project_dict['parts']['part_5']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_5']['timing']['ppap_date'][0:4]) if part_5 else None
 
-    sop_hella_date = project_dict['project']['sop_hella_date'][0:10] or None
+    sop_hella_date = project_dict['project']['sop'][3:] or None
     sheet['F12'] = sop_hella_date if part_1 else None
     sheet['H12'] = sop_hella_date if part_2 else None
     sheet['J12'] = sop_hella_date if part_3 else None
@@ -256,7 +256,7 @@ def xls_inject_supplier_selection(project):
         sheet['K10'] = project_dict['parts'][part_n]['general_info']['mtl_group'] or None
         sheet['E10'] = project_dict['parts'][part_n]['general_info']['cmd_group'] or None
 
-        sheet['E12'] = project_dict['project']['sop_hella_date'] or None
+        sheet['E12'] = project_dict['project']['sop'] or None
         sheet['K12'] = project_dict['project']['lifetime'] or None
 
         sheet['E14'] = project_dict['parts'][part_n]['general_info']['volume_avg'] or None
@@ -336,7 +336,7 @@ def xls_inject_supplier_selection(project):
 
 
         # save the inject
-        outout_file_name = './output/' + file_name + '_' + part + '_output.xlsx'
+        outout_file_name = './output/' + file_name + '_' + part + '.xlsx'
         wb.save(outout_file_name)
         output_file_list.append(outout_file_name)
 
@@ -385,7 +385,7 @@ def xls_inject_sb(project, part_list):
     sheet['AK6'] = project_dict['project']['sqa'] or None
 
     
-    sheet['H9'] = project_dict['project']['sop_hella_date'][0:4] or None
+    sheet['H9'] = project_dict['project']['sop'][6:10] or None
     sheet['H10'] = project_dict['project']['year_1_volume'] or None
     sheet['L10'] = project_dict['project']['year_2_volume'] or None
     sheet['P10'] = project_dict['project']['year_3_volume'] or None
@@ -399,7 +399,7 @@ def xls_inject_sb(project, part_list):
 
     sheet['F16'] = project_dict['project']['run_rate_date'][0:10] or None 
     sheet['F17'] = project_dict['project']['pv_hella_date'][0:10] or None
-    sheet['F18'] = project_dict['project']['sop_hella_date'][0:10]or None
+    sheet['F18'] = project_dict['project']['sop'][6:10]or None
     sheet['F19'] = project_dict['project']['sop_customer_date'][0:10] or None
 
     sheet['F24'] = part_1
@@ -1124,10 +1124,10 @@ def xls_inject_sb(project, part_list):
     sheet['EK161'] = (project_dict['parts']['part_4']['quotations']['vendor_3']['pvo'] - project_dict['parts']['part_4']['general_info']['pvo']) if part_4_vendor_3 else None
 
     # capacity check
-    sheet['D188'] = project_dict['project']['sop_hella_date'][0:4] if part_1_vendor_1 else None
-    sheet['AY188'] = project_dict['project']['sop_hella_date'][0:4] if part_2_vendor_1 else None
-    sheet['CT188'] = project_dict['project']['sop_hella_date'][0:4] if part_3_vendor_1 else None
-    sheet['EO188'] = project_dict['project']['sop_hella_date'][0:4] if part_4_vendor_1 else None
+    sheet['D188'] = project_dict['project']['sop'][6:10] if part_1_vendor_1 else None
+    sheet['AY188'] = project_dict['project']['sop'][6:10] if part_2_vendor_1 else None
+    sheet['CT188'] = project_dict['project']['sop'][6:10] if part_3_vendor_1 else None
+    sheet['EO188'] = project_dict['project']['sop'][6:10] if part_4_vendor_1 else None
 
     sheet['F188'] = project_dict['project']['year_1_volume'] or None
     sheet['F189'] = project_dict['project']['year_2_volume'] or None
