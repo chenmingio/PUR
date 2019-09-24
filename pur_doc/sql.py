@@ -185,7 +185,7 @@ def get_part_volume_inweek(project, part, vendor):
     row = cursor.fetchone()
     # print(row)
 
-    if row and row[0]:
+    if row and type(row[0]) == int:
 
         wpy = float(row[0])
 
