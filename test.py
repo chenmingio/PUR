@@ -9,6 +9,7 @@ TEST_VENDOR = "48200025"
 TEST_PART = "175.224-40"
 TEST_PART_LIST = ['230.033-00', '230.033-10']
 TEST_PROJECT_LIST = ['1111E.001377'] #, '1111E.000545', '1111E.000726', '1111E.000903', '1111E.001043', '1111E.001125', '1111E.001236', '1111E.001354', '1111K.000030', '1111K.000167', '1111P.000069', '1111E.000590']
+ALL_PROJECT_LIST = sql.get_all_project_list()
 
 
 class TestSum(unittest.TestCase):
@@ -76,6 +77,9 @@ class TestSum(unittest.TestCase):
             #     # print(inject_data)
             #     for part in part_list:
             #         print(sql.get_part_volume_inweek(project, part, vendor))
+
+        # print(sql.get_all_project_list())
+
         pass
 
     def test_inject(self):
@@ -86,7 +90,7 @@ class TestSum(unittest.TestCase):
 
         # xls_inject_sb(TEST_PROJECT2)
 
-        xls_inject_cbd(TEST_PROJECT)
+        # xls_inject_cbd(TEST_PROJECT)
 
         pass
 
@@ -97,6 +101,26 @@ class TestSum(unittest.TestCase):
 
         pass
 
+    def test_risk_eval(self):
+
+        # for project in ALL_PROJECT_LIST:
+        #     part_list = sql.get_project_part_list(project)
+        #     xls_inject.xls_inject_risk_eval(project, part_list)
+
+        pass
+
+    def test_selection_sheet(self):
+
+        # for project in ALL_PROJECT_LIST:
+        #     xls_inject_supplier_selection(project)
+
+        pass
+
+    def test_nl(self):
+        pass
+
+    def test_cbd(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

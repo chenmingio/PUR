@@ -579,3 +579,13 @@ def get_vendor_by_part_in_dict(project, part):
 
     return result
 
+def get_all_project_list():
+    '''used for all projects test'''
+
+    cursor = CONN.cursor()
+    cursor.execute('''SELECT DISTINCT * FROM project_data''')
+
+    rows = cursor.fetchall()
+    project_list = [row[0] for row in rows]
+
+    return project_list

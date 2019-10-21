@@ -145,8 +145,6 @@ def risk_eval_generation():
     if 'all' in selected_part_list:
         selected_part_list = sql.get_project_part_list(project)
     
-    print(selected_part_list)
-
     xls_inject.xls_inject_risk_eval(project, selected_part_list)
 
     return static_file('risk_eval_output.xlsx', root='./output/')
