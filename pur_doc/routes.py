@@ -117,6 +117,43 @@ def nomination_generate():
     return static_file('nl_output.docx', root='./output/')
 
 
+# return the page for PCB NL download
+@get('/nl_pcb')
+@view('nl_pcb.html', template_lookup=[TEMPLATE_PATH])
+def nl_pcb_form():
+    return {}
+
+@post('/nl_pcb')
+@view('nl_pcb_parts.html', template_lookup=[TEMPLATE_PATH])
+def nl_pcb_parts_form():
+    project = request.forms.get('project') 
+    vendor = request.forms.get('vendor')
+
+    part_list = sql.get_part_list_by_project_vendor(project, vendor)
+
+    result = {}
+    result['part_list'] = part_list
+    result['project'] = project
+    result['vendor'] = vendor
+
+    return result
+
+@post('/nl_pcb/parts')
+def nomination_pcb_generate():
+    ''' return docx file according to form request'''
+    selected_part_list = request.forms.getall('parts')
+    project = request.forms.get('project')
+    vendor = request.forms.get('vendor')
+
+    if 'all' in selected_part_list:
+        selected_part_list = sql.get_part_list_by_project_vendor(project, vendor)
+
+    inject_data = sql.assemble_nl_info(project, vendor, selected_part_list)
+
+    word.generate_nl_pcb(inject_data)
+
+    return static_file('nl_pcb_output.docx', root='./output/')
+
 @get('/re')
 @view('re.html', template_lookup=[TEMPLATE_PATH])
 def risk_eval_get():
