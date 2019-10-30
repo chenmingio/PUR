@@ -5,13 +5,20 @@ from pur_doc.constant import FILES, TEMPLATE_PATH, DATA_PATH
 from pur_doc.load_excel import load_excel
 from pur_doc import xls_inject, sql, word
 
+# logging setup
+
+import logging
+import logging.config
+
+logging.config.fileConfig('logging.conf')
+
+logger = logging.getLogger(__name__)
 
 # return index
 @route('/')
 @view('index.html', template_lookup=[TEMPLATE_PATH])
 def index():
     return {}
-
 
 
 # return a page for file upload
@@ -27,12 +34,16 @@ def save_upload():
     upload = request.files.get('upload')  # pylint: disable=no-member
     filename = upload.filename
 
+    logger.info('%s requested to upload', filename)
+
     # save the file with correct name only
     if filename in FILES:
 
         # Just overwrite the file with same name
         save_path = DATA_PATH
         upload.save(save_path, overwrite=True)
+
+        logger.info('%s upload success', filename)
 
         # after excel file is uploaded, trigger the event to refresh database
         if 'xlsx' in filename:
@@ -92,6 +103,9 @@ def nl_parts_form():
     vendor = request.forms.get('vendor')
 
     part_list = sql.get_part_list_by_project_vendor(project, vendor)
+
+    logger.info('normination letter requested for project %s w/ parts %s', project, str(part_list))
+    logger.info('normination letter generated for project %s w/ parts %s', project, str(part_list))
 
     result = {}
     result['part_list'] = part_list
@@ -182,7 +196,11 @@ def risk_eval_generation():
     if 'all' in selected_part_list:
         selected_part_list = sql.get_project_part_list(project)
     
+    logger.info('Risk Eval requested for project %s w/ parts %s', project, str(selected_part_list))
+    
     xls_inject.xls_inject_risk_eval(project, selected_part_list)
+
+    logger.info('Risk Eval generated for project %s w/ parts %s', project, str(selected_part_list))
 
     return static_file('risk_eval_output.xlsx', root='./output/')
     
@@ -198,7 +216,12 @@ def supplier_selection_post():
     '''return supplier selection xlsx file'''
 
     project = request.forms.get('project')
+
+    logger.info('Supplier Selection requested for project %s', project)
+
     xls_inject.xls_inject_supplier_selection(project)
+
+    logger.info('Supplier Selection generated for project %s', project)
 
     return static_file('ss.zip', root='./output/')
 
@@ -215,6 +238,11 @@ def cbd_post():
     '''return cbd xlsx file zip'''
 
     project = request.forms.get('project')
+
+    logger.info('CBD requested for project %s', project)
+
     xls_inject.xls_inject_cbd(project)
+
+    logger.info('CBD generated for project %s', project)
 
     return static_file('cbd.zip', root='./output/')
