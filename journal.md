@@ -19,6 +19,8 @@
 - [ ] do I need thread/quque setting? [Python Exceptions: An Introduction – Real Python](https://realpython.com/python-exceptions/)
 - [ ] try - catch cycle?
 - [ ] optimise data/number format with ','
+- [ ] optimize nginx setup
+- [ ] gunicorn's own logging function
 
 
 ## Work Logs
@@ -38,7 +40,7 @@ No.
 
 [Logging Cookbook — Python 3.5.7 documentation](https://docs.python.org/3.5/howto/logging-cookbook.html)
 
-[Python Logging Basics - The Ultimate Guide To Logging](https://www.loggly.com/ultimate-guide/python-logging-basics/)
+[Python Logging Basics - The Ultimate Guide To Logging](https://www.loggly.com/ultimate-guide/python-logging-basics/) focus on best practice
 
 [Logging HOWTO — Python 3.8.0 documentation](https://docs.python.org/3.8/howto/logging.html#logging-basic-tutorial)
 
@@ -47,6 +49,12 @@ No.
 #### Exception handle
 
 [Python Exceptions: An Introduction – Real Python](https://realpython.com/python-exceptions/)
+
+[8. Errors and Exceptions — Python 3.8.0 documentation](https://docs.python.org/3/tutorial/errors.html)
+
+Try exception best practice:
+
+> Finally, applications should wrap a try/except block around the main application code to send any exceptions through the logging interface instead of just to stderr.  This is known as a global try catch handler. It should not be where you handle all your exception logging, you should continue to plan for exceptions in try catch blocks at necessary points in your code as a rule of thumb.
 
 ## Debug Logs
 
