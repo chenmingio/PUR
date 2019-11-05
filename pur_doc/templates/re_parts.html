@@ -1,36 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <h1>Rish Evaluation Download</h1>
+{% block content %}
 
-    <div>
-        <form action="/re/parts" method="POST">
-            <div>
-                <label for="project">Project</label>
-                <input type="text" name="project" value="{{ project }}" readonly>
 
+<div class="row">
+    <h3>Risk Evaluation Download</h3>
+</div>
+
+
+<div class="row">
+    <form class="col s9" action="/re/parts" method="POST">
+        <div class="row">
+            <div class="input-field col s6">
+                <input id="project" type="text" name="project" value="{{ project }}" readonly>
+                <label for="project">Your Project</label>
             </div>
+        </div>
+        <div class="row">
+            <div class="col s9">
+                <p>Selection your parts. Hold CTRL key for multi selection.</p>
+            </div>
+        </div>
 
-            <br>
-    <h3>Select parts you need. Hold Control key for multi selection.</h3>
-            <br>
-            <div>
-                <select multiple size="6" name="parts">
+        <div class="row">
+            <div class="input-field col s6">
+                <select multiple class="browser-default" name="parts" style="width:100%; height:8em">
                     <option value="all">select all</option>
-                    % for part in part_list:
+                    {% for part in part_list %}
                     <option value="{{ part }}">{{ part }}</option>
-                    % end
+                    {% endfor %}
                 </select>
             </div>
+        </div>
 
-            <input value="download" type="submit" />
-        </form>
-    </div>
-</body>
+        <div class="row">
+            <div class="col s9">
+                <button class="btn waves-effect waves-light col s3" type="submit" name="action">Download
+                </button>
+            </div>
+        </div>
+    </form>
 
-</html>
+</div>
+
+{% endblock %}

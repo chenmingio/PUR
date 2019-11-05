@@ -49,7 +49,6 @@ def save_upload():
 
 
 
-# return the page for NL download
 @get('/sb')
 @view('sb.html', template_lookup=[TEMPLATE_PATH])
 def sb_form():
@@ -82,6 +81,23 @@ def sb_generate():
     return static_file('source_ge_output.xlsx', root='./output/')
 
 
+# return the page for Meeting Minuites download
+@get('/mm')
+@view('mm.html', template_lookup=[TEMPLATE_PATH])
+def mm_form():
+    return {}
+
+@post('/mm')
+def mm_return():
+    project = request.forms.get('project') 
+
+    word.generate_mm(project)
+
+    # TODO remove the folder
+
+    # return static_file()
+
+    return result
 
 # return the page for NL download
 @get('/nl')
@@ -113,6 +129,7 @@ def nomination_generate():
     selected_part_list = request.forms.getall('parts')
     project = request.forms.get('project')
     vendor = request.forms.get('vendor')
+    print(">>> request is: ", project, vendor, selected_part_list)
 
     if 'all' in selected_part_list:
         selected_part_list = sql.get_part_list_by_project_vendor(project, vendor)
@@ -200,12 +217,12 @@ def risk_eval_generation():
 
 @get('/ss')
 @view('supplier_selection.html', template_lookup=[TEMPLATE_PATH])
-def supplier_selection_get():
+def supplier_selection_form():
     return {}
 
 
 @post('/ss')
-def supplier_selection_post():
+def supplier_selection_return():
     '''return supplier selection xlsx file'''
 
     project = request.forms.get('project')
