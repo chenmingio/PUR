@@ -88,18 +88,31 @@ def mm_form():
     return {}
 
 @post('/mm')
+@view('mm_parts.html', template_lookup=[TEMPLATE_PATH])
 def mm_return():
     project = request.forms.get('project') 
 
-    word.generate_mm(project)
+    part_list = sql.get_project_part_list(project)
 
-    # TODO remove the folder
-
-    # return static_file()
+    result = {}
+    result['part_list'] = part_list
+    result['project'] = project
 
     return result
 
-# return the page for NL download
+@post('/mm/parts')
+def mm_generation():
+    ''' return meeting minutes file according to form request'''
+    selected_part_list = request.forms.getall('parts')
+    project = request.forms.get('project')
+
+    if 'all' in selected_part_list:
+        selected_part_list = sql.get_project_part_list(project)
+    
+    xls_inject.xls_inject_mm(project, selected_part_list)
+
+    return static_file('sourcing_mm_output.xlsx', root='./output/')
+
 @get('/nl')
 @view('nl.html', template_lookup=[TEMPLATE_PATH])
 def nl_form():

@@ -36,24 +36,3 @@ def generate_nl_pcb(inject_data):
     doc.render(inject_data)
 
     doc.save(output_file_path)
-
-def generate_mm(project):
-    '''generate mm for all parts under this project'''
-
-    # prepare the data
-    part_list = sql.get_project_part_list(project)
-
-    # create folder
-    template_file_path = TEMPLATE_PATH + 'sds_mm.docx'
-    output_folder_path = './output/mm_output'
-
-    if os.path.exists(output_folder_path):
-        pass
-
-    for part in part_list:
-        output_file_path = './output/mm_' + project + '/mm_' + part + '.docx'
-        rc = sql.assemble_project(project, [part])
-
-        doc = DocxTemplate(template_file_path)
-        doc.render(rc)
-        doc.save(output_file_path)

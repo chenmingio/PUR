@@ -120,6 +120,65 @@ def xls_inject_risk_eval(project, part_list):
     # save the inject
     wb.save('./output/' + file_name + '_output.xlsx')
 
+def xls_inject_mm(project, part_list):
+    """generate xls file with given project id and part list"""
+
+    file_name = 'sourcing_mm'
+    file_path = TEMPLATE_PATH + file_name + '.xlsx'
+    sheet_name = 'Sourcing_Meeting_Minutes'
+
+    # load workbook into openpyxl
+    wb = load_workbook(file_path)
+
+    # load the sheet
+    sheet = wb[sheet_name]
+
+    # get the value
+    project_dict = sql.assemble_project(project, part_list)
+
+    # start injection
+    sheet['G7'] = project_dict['project']['project'] or None
+    sheet['G8'] = project_dict['project']['project_name'] or None
+
+    part_1 = project_dict['parts']['part_1']['general_info']['part'] or None
+    part_2 = project_dict['parts']['part_2']['general_info']['part'] or None 
+    part_3 = project_dict['parts']['part_3']['general_info']['part'] or None
+    part_4 = project_dict['parts']['part_4']['general_info']['part'] or None
+    part_5 = project_dict['parts']['part_5']['general_info']['part'] or None
+    
+    delimiter = '; '
+
+    sheet['G10'] = part_1 + ((delimiter + part_2) if part_2 else "") + ((delimiter + part_3) if part_3 else "") + ((delimiter + part_4) if part_4 else "") + ((delimiter + part_5) if part_5 else "")
+
+    part_1_des = project_dict['parts']['part_1']['general_info']['part_description'] or None
+    part_2_des = project_dict['parts']['part_2']['general_info']['part_description'] or None
+    part_3_des = project_dict['parts']['part_3']['general_info']['part_description'] or None
+    part_4_des = project_dict['parts']['part_4']['general_info']['part_description'] or None
+    part_5_des = project_dict['parts']['part_5']['general_info']['part_description'] or None
+
+    sheet['G11'] = part_1_des + ((delimiter + part_2_des) if part_2_des else "") + ((delimiter + part_3_des) if part_3_des else "") + ((delimiter + part_4_des) if part_4_des else "") + ((delimiter + part_5_des) if part_5_des else "")
+
+    part_1_id = project_dict['parts']['part_1']['general_info']['nr_id'] or None
+    part_2_id = project_dict['parts']['part_2']['general_info']['nr_id'] or None
+    part_3_id = project_dict['parts']['part_3']['general_info']['nr_id'] or None
+    part_4_id = project_dict['parts']['part_4']['general_info']['nr_id'] or None
+    part_5_id = project_dict['parts']['part_5']['general_info']['nr_id'] or None
+
+    sheet['G12'] = str(part_1_id) + ((delimiter + str(part_2_id)) if part_2_id else "") + ((delimiter + str(part_3_id)) if part_3_id else "") + ((delimiter + str(part_4_id)) if part_4_id else "") + ((delimiter + str(part_5_id)) if part_5_id else "")
+    
+    sheet['B17'] = project_dict['project']['pjm'] or None
+    sheet['B18'] = project_dict['project']['md'] or None
+    sheet['B19'] = project_dict['project']['sqa'] or None
+    sheet['H17'] = project_dict['project']['pur'] or None
+    sheet['H18'] = project_dict['project']['mgs'] or None
+    sheet['H19'] = project_dict['project']['mgs-sqa'] or None
+    sheet['H20'] = project_dict['project']['mgm'] or None
+
+    # save the inject
+    wb.save('./output/' + file_name + '_output.xlsx')
+
+
+
 def xls_inject_cbd(project):
     '''output CBD in zip file'''
 
