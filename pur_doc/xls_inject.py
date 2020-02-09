@@ -23,6 +23,7 @@ def xls_inject_risk_eval(project, part_list):
 
     # get the value
     project_dict = sql.assemble_project(project, part_list)
+    print(f">>>project dict is {project_dict}")
 
     # start injection
 

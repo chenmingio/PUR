@@ -213,3 +213,9 @@ root - INFO - Supplier Selection requested for project 1111E.200143
 root - INFO - Supplier Selection generated for project 1111E.200143
 root - INFO - CBD requested for project 1111E.200143
 root - INFO - CBD generated for project 1111E.200143
+root - INFO - Risk Eval requested for project 1111E.001236 w/ parts ['178.576-15', '191.674-01', '229.847-00', '234.536-00', '323.140-00']
+root - INFO - Risk Eval generated for project 1111E.001236 w/ parts ['178.576-15', '191.674-01', '229.847-00', '234.536-00', '323.140-00']
+root - INFO - 01_nr.xlsx requested to upload
+root - INFO - 01_nr.xlsx upload success
+root - INFO - 01_nr.xlsx requested to upload
+root - INFO - 01_nr.xlsx upload success

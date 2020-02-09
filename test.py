@@ -1,8 +1,21 @@
+from pprint import pprint
 from pur_doc import sql, xls_inject, word
 from pur_doc.xls_inject import *
 
 
-TEST_PROJECT = "1111E.001236"
+# test projects
+test_project_blank = ""
+test_project_none = None
+test_project_1 = "1111E.001236"
+test_project_fake = "fake_project_id"
+test_project_list = [
+    # test_project_blank,
+    # test_project_none,
+    test_project_1,
+    test_project_fake,
+]
+
+# test vendors
 TEST_VENDOR = "48200025"
 TEST_PART = "175.224-40"
 TEST_PART_LIST = ['230.033-00', '230.033-10']
@@ -19,9 +32,6 @@ ALL_PROJECT_LIST = sql.get_all_project_list()
 
     # print(sql.get_project_part_list(TEST_PROJECT3))
 
-    # self.assertCountEqual(sql.get_project_info(TEST_PROJECT), [])
-
-    # print(sql.get_project_info(TEST_PROJECT))
 
     # print(sql.get_part_general_info(TEST_PART))
 
@@ -109,15 +119,21 @@ ALL_PROJECT_LIST = sql.get_all_project_list()
 #         xls_inject_supplier_selection(project)
 
 
-def test_nl():
+# def test_nl():
 
-    for project in ALL_PROJECT_LIST:
-        vendor_list = sql.get_vendor_list(project)
-        for vendor in vendor_list:
-            part_list = sql.get_part_list_by_project_vendor(project, vendor)
-            nomi_data = sql.assemble_nl_info(project, vendor, part_list) 
-            print(nomi_data)
+#     for project in ALL_PROJECT_LIST:
+#         vendor_list = sql.get_vendor_list(project)
+#         for vendor in vendor_list:
+#             part_list = sql.get_part_list_by_project_vendor(project, vendor)
+#             nomi_data = sql.assemble_nl_info(project, vendor, part_list) 
+#             print(nomi_data)
 
 
-def test_cbd():
-    pass
+# def test_cbd():
+#     pass
+
+def test_get_project_info():
+
+    for project in test_project_list:
+        print(f">>> project is {project}")
+        assert sql.get_project_info(project)['project'] == project

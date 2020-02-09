@@ -4,9 +4,22 @@ import openpyxl
 from collections import defaultdict
 
 from pur_doc.constant import DB_URL, EX_RATE, LOCAL_SB_THRESHOLD
-# DB_URL = './data/nr.db'
 
 CONN = sqlite3.connect(DB_URL, check_same_thread=False)
+CONN_f = sqlite3.connect(DB_URL, check_same_thread=False)
+
+# SQL Dict Factory Setting
+def dict_factory(cursor, row):
+    '''try to use normal dict to refactor'''
+
+    print(">>> dict_factory runing...")
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+CONN_f.row_factory = dict_factory
+
 
 # build a default dict type whoes default value is itself
 class myDefaultDict(defaultdict):
@@ -14,6 +27,8 @@ class myDefaultDict(defaultdict):
 
 def rec_dd():
     return myDefaultDict(rec_dd)
+
+
 
 
 def dict_factory_single_row(cursor, row):
@@ -354,19 +369,18 @@ def get_vendor_info(vendor):
 
 
 def get_project_info(project):
-    '''return combined project info in one dict from sheets: project_data and project_info'''
-    cursor = CONN.cursor()
+    '''from TABLE: project_data + project_info'''
+    cursor = CONN_f.cursor()
     context = (project,)
 
     cursor.execute(
         '''SELECT * FROM project_data LEFT JOIN project_info USING (project) 
             LEFT JOIN plant USING (plant) WHERE project=?''', context)
 
-    # return one row
     row = cursor.fetchone()
-
-    result = dict_factory_single_row(cursor, row)
-    return result
+    print(f">>> titles are {cursor.description}.")
+    print(f">>> row is {row}.")
+    return row
 
 
 def get_project_part_list(project):
