@@ -221,6 +221,7 @@ def xls_inject_cbd_project(project):
 
 
 
+
 def xls_inject_supplier_selection(project):
     '''output supplier selection in zip file'''
 

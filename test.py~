@@ -220,7 +220,3 @@ def test_xls_inject_cbd_single():
 
     # run injection
     xls_inject.xls_inject_cbd_single(*test_project_part_tuple_2, "48200041", wb)
-
-def test_xls_inject_cbd_project():
-
-    xls_inject.xls_inject_cbd_project(test_project_1)
