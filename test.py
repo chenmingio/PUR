@@ -8,12 +8,20 @@ test_project_blank = ""
 test_project_none = None
 test_project_1 = "1111E.001236"
 test_project_fake = "fake_project_id"
-test_project_list = [
-    # test_project_blank,
-    # test_project_none,
-    test_project_1,
-    test_project_fake,
-]
+
+# test single parts
+
+
+# test project/part tuple
+test_project_part_tuple_1 = ("1111E.001236", "178.576-15")
+test_project_part_tuple_2 = ("1111E.001236", "191.674-01")
+test_project_part_tuple_3 = ("1111E.001236", "229.847-00")
+test_project_part_tuple_4 = ("1111E.001236", "fake_part_number")
+
+# test project/part tuple
+test_project_part_list_tuple_1 = ("1111E.001236", ["178.576-15", "191.674-01", "229.847-00", "234.536-00"])
+
+
 
 # test vendors
 TEST_VENDOR = "48200025"
@@ -30,7 +38,6 @@ ALL_PROJECT_LIST = sql.get_all_project_list()
 
     # self.assertEqual(sql.get_part_risk(TEST_PART), 'L')
 
-    # print(sql.get_project_part_list(TEST_PROJECT3))
 
 
     # print(sql.get_part_general_info(TEST_PART))
@@ -134,6 +141,51 @@ ALL_PROJECT_LIST = sql.get_all_project_list()
 
 def test_get_project_info():
 
-    for project in test_project_list:
-        print(f">>> project is {project}")
-        assert sql.get_project_info(project)['project'] == project
+    assert sql.get_project_info(test_project_1)['project'] == test_project_1
+    print(sql.get_project_info(test_project_1).keys())
+    assert sql.get_project_info(test_project_blank) == None
+    assert sql.get_project_info(test_project_fake) == None
+    assert sql.get_project_info(test_project_none) == None
+
+def test_get_part_list_by_project():
+    print(sql.get_part_list_by_project(test_project_1))
+    print(sql.get_part_list_by_project(test_project_blank))
+    print(sql.get_part_list_by_project(test_project_fake))
+    print(sql.get_part_list_by_project(test_project_none))
+
+def test_get_part_general_info():
+    print(sql.get_part_general_info(*test_project_part_tuple_1)["part"])
+
+def test_get_part_volume_avg():
+    print(">>> volume avg ", sql.get_part_volume_avg(*test_project_part_tuple_1))
+    print(">>> volume avg ", sql.get_part_volume_avg(*test_project_part_tuple_2))
+    print(">>> volume avg ", sql.get_part_volume_avg(*test_project_part_tuple_3))
+    print(">>> volume avg ", sql.get_part_volume_avg(*test_project_part_tuple_4))
+
+
+def test_get_part_pvo_part():
+    print(">>>part_pvo_part ", sql.get_part_pvo_part(*test_project_part_tuple_1))
+    print(">>>part_pvo_part ", sql.get_part_pvo_part(*test_project_part_tuple_2))
+    print(">>>part_pvo_part ", sql.get_part_pvo_part(*test_project_part_tuple_3))
+    print(">>>part_pvo_part ", sql.get_part_pvo_part(*test_project_part_tuple_4))
+
+
+def test_get_part_lifetime():
+    print(">>> part lifetime ", sql.get_part_lifetime(*test_project_part_tuple_1))
+    print(">>> part lifetime ", sql.get_part_lifetime(*test_project_part_tuple_2))
+    print(">>> part lifetime ", sql.get_part_lifetime(*test_project_part_tuple_3))
+    print(">>> part lifetime ", sql.get_part_lifetime(*test_project_part_tuple_4))
+
+def test_get_target_avg_100EUR():
+    print(">>> target avg price ", sql.get_part_target_price_avg_100EUR(*test_project_part_tuple_1))
+    print(">>> target avg price ", sql.get_part_target_price_avg_100EUR(*test_project_part_tuple_2))
+    print(">>> target avg price ", sql.get_part_target_price_avg_100EUR(*test_project_part_tuple_3))
+    print(">>> target avg price ", sql.get_part_target_price_avg_100EUR(*test_project_part_tuple_4))
+
+def test_get_part_timing():
+    print(">>>part timing ", sql.get_part_timing(*test_project_part_tuple_2).keys())
+    print(">>>part timing ", sql.get_part_timing(*test_project_part_tuple_2)['ppap_date'])
+
+# test injection function
+def test_xls_inject_risk_eval():
+    xls_inject_risk_eval(*test_project_part_list_tuple_1)

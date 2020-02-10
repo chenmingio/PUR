@@ -9,7 +9,6 @@ CBD_SHEET_PASSWORD = constant.cbd_sheet_password
 from os import remove
 
 def xls_inject_risk_eval(project, part_list):
-    '''xxx'''
 
     file_name = 'risk_eval'
     file_path = TEMPLATE_PATH + file_name + '.xlsx'
@@ -22,101 +21,57 @@ def xls_inject_risk_eval(project, part_list):
     sheet = wb[sheet_name]
 
     # get the value
-    project_dict = sql.assemble_project(project, part_list)
-    print(f">>>project dict is {project_dict}")
+    # inject project information
+    project_info = sql.get_project_info(project)
+    if project_info:
+        sheet['E1'] = project_info['project_name']
 
-    # start injection
+    n = 0
+    for part in part_list:
+        context = (project, part)
+        column = (6 + 2*n)
 
-    sheet['E1'] = project_dict['project']['project_name'] or None
+        print(f">>> project is {project}.")
+        print(f">>> part is {part}.")
 
-    part_1 = project_dict['parts']['part_1']['general_info']['part'] or None
-    part_2 = project_dict['parts']['part_2']['general_info']['part'] or None 
-    part_3 = project_dict['parts']['part_3']['general_info']['part'] or None
-    part_4 = project_dict['parts']['part_4']['general_info']['part'] or None
-    part_5 = project_dict['parts']['part_5']['general_info']['part'] or None
+        # part general info
+        part_general_info = sql.get_part_general_info(*context)
+        if part_general_info:
+            sheet.cell(row=4, column=column).value = part_general_info['part']
+            sheet.cell(row=5, column=column).value = part_general_info['part_description']
+            sheet.cell(row=6, column=column).value = part_general_info['mtl_group']
+            sheet.cell(row=13, column=column).value = part_general_info['raw_mtl']
+            sheet.cell(row=14, column=column).value = part_general_info['mgm']
+            sheet.cell(row=15, column=column).value = part_general_info['mgs']
+            sheet.cell(row=16, column=column).value = part_general_info['buyer']
 
-    sheet['F4'] = part_1
-    sheet['H4'] = part_2
-    sheet['J4'] = part_3
-    sheet['L4'] = part_4
-    sheet['N4'] = part_5
+        # volume_avg
+        vol_avg = sql.get_part_volume_avg(*context)
+        if vol_avg:
+            sheet.cell(row=7, column=column).value = int(vol_avg)
 
-    sheet['F5'] = project_dict['parts']['part_1']['general_info']['part_description'] or None
-    sheet['H5'] = project_dict['parts']['part_2']['general_info']['part_description'] or None
-    sheet['J5'] = project_dict['parts']['part_3']['general_info']['part_description'] or None
-    sheet['L5'] = project_dict['parts']['part_4']['general_info']['part_description'] or None
-    sheet['N5'] = project_dict['parts']['part_5']['general_info']['part_description'] or None
+        # target price:
+        target_price = sql.get_part_target_price_avg_100EUR(*context)
+        sheet.cell(row=8, column=column).value = target_price # Input as None is ok
 
-    sheet['F6'] = project_dict['parts']['part_1']['general_info']['mtl_group'] or None
-    sheet['H6'] = project_dict['parts']['part_2']['general_info']['mtl_group'] or None
-    sheet['J6'] = project_dict['parts']['part_3']['general_info']['mtl_group'] or None
-    sheet['L6'] = project_dict['parts']['part_4']['general_info']['mtl_group'] or None
-    sheet['N6'] = project_dict['parts']['part_5']['general_info']['mtl_group'] or None
+        # lifetime:
+        lifetime = sql.get_part_lifetime(*context)
+        sheet.cell(row=9, column=column).value = lifetime # input as None is ok
 
-    sheet['F7'] = project_dict['parts']['part_1']['general_info']['volume_avg'] or None
-    sheet['H7'] = project_dict['parts']['part_2']['general_info']['volume_avg'] or None
-    sheet['J7'] = project_dict['parts']['part_3']['general_info']['volume_avg'] or None
-    sheet['L7'] = project_dict['parts']['part_4']['general_info']['volume_avg'] or None
-    sheet['N7'] = project_dict['parts']['part_5']['general_info']['volume_avg'] or None
+        # plant and sop
+        if project_info:
+            sheet.cell(row=10, column=column).value = project_info['plant']
+            sheet.cell(row=10, column=column).value = project_info['plant']
 
-    sheet['F8'] = project_dict['parts']['part_1']['general_info']['target_price100_EUR'] or None
-    sheet['H8'] = project_dict['parts']['part_2']['general_info']['target_price100_EUR'] or None
-    sheet['J8'] = project_dict['parts']['part_3']['general_info']['target_price100_EUR'] or None
-    sheet['L8'] = project_dict['parts']['part_4']['general_info']['target_price100_EUR'] or None
-    sheet['N8'] = project_dict['parts']['part_5']['general_info']['target_price100_EUR'] or None
+        # part_timing
+        part_timing = sql.get_part_timing(*context)
+        if part_timing:
+            ppap = part_timing['ppap_date']
+            sheet.cell(row=11, column=column).value = ppap[5:7] + '.' + ppap[0:4]
+            sheet.cell(row=12, column=column).value = ppap[3:]
 
-    project_lifetime = project_dict['project']['lifetime'] or None
-    sheet['F9'] = project_lifetime if part_1 else None
-    sheet['H9'] = project_lifetime if part_2 else None
-    sheet['J9'] = project_lifetime if part_3 else None
-    sheet['L9'] = project_lifetime if part_4 else None
-    sheet['N9'] = project_lifetime if part_5 else None
-
-
-    plant = project_dict['project']['plant'] or None
-    sheet['F10'] = plant if part_1 else None
-    sheet['H10'] = plant if part_2 else None
-    sheet['J10'] = plant if part_3 else None
-    sheet['L10'] = plant if part_4 else None
-    sheet['N10'] = plant if part_5 else None
-
-    # PPAP date = C sample date
-    sheet['F11'] = (project_dict['parts']['part_1']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_1']['timing']['ppap_date'][0:4]) if part_1 else None
-    sheet['H11'] = (project_dict['parts']['part_2']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_2']['timing']['ppap_date'][0:4]) if part_2 else None
-    sheet['J11'] = (project_dict['parts']['part_3']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_3']['timing']['ppap_date'][0:4]) if part_3 else None
-    sheet['L11'] = (project_dict['parts']['part_4']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_4']['timing']['ppap_date'][0:4]) if part_4 else None
-    sheet['N11'] = (project_dict['parts']['part_5']['timing']['ppap_date'][5:7] + '.' + project_dict['parts']['part_5']['timing']['ppap_date'][0:4]) if part_5 else None
-
-    sop_hella_date = project_dict['project']['sop'][3:] or None
-    sheet['F12'] = sop_hella_date if part_1 else None
-    sheet['H12'] = sop_hella_date if part_2 else None
-    sheet['J12'] = sop_hella_date if part_3 else None
-    sheet['L12'] = sop_hella_date if part_4 else None
-    sheet['N12'] = sop_hella_date if part_5 else None
-
-    sheet['F13'] = project_dict['parts']['part_1']['general_info']['raw_mtl'] or None
-    sheet['H13'] = project_dict['parts']['part_2']['general_info']['raw_mtl'] or None
-    sheet['J13'] = project_dict['parts']['part_3']['general_info']['raw_mtl'] or None
-    sheet['L13'] = project_dict['parts']['part_4']['general_info']['raw_mtl'] or None
-    sheet['N13'] = project_dict['parts']['part_5']['general_info']['raw_mtl'] or None
-
-    sheet['F14'] = project_dict['parts']['part_1']['general_info']['mgm'] or None
-    sheet['H14'] = project_dict['parts']['part_2']['general_info']['mgm'] or None
-    sheet['J14'] = project_dict['parts']['part_3']['general_info']['mgm'] or None
-    sheet['L14'] = project_dict['parts']['part_4']['general_info']['mgm'] or None
-    sheet['N14'] = project_dict['parts']['part_5']['general_info']['mgm'] or None
-
-    sheet['F15'] = project_dict['parts']['part_1']['general_info']['mgs'] or None
-    sheet['H15'] = project_dict['parts']['part_2']['general_info']['mgs'] or None
-    sheet['J15'] = project_dict['parts']['part_3']['general_info']['mgs'] or None
-    sheet['L15'] = project_dict['parts']['part_4']['general_info']['mgs'] or None
-    sheet['N15'] = project_dict['parts']['part_5']['general_info']['mgs'] or None
-
-    sheet['F16'] = project_dict['parts']['part_1']['general_info']['buyer'] if part_1 else None
-    sheet['H16'] = project_dict['parts']['part_2']['general_info']['buyer'] if part_2 else None
-    sheet['J16'] = project_dict['parts']['part_3']['general_info']['buyer'] if part_3 else None
-    sheet['L16'] = project_dict['parts']['part_4']['general_info']['buyer'] if part_4 else None
-    sheet['N16'] = project_dict['parts']['part_5']['general_info']['buyer'] if part_5 else None
+        # next part
+        n += 1
 
     # save the inject
     wb.save('./output/' + file_name + '_output.xlsx')

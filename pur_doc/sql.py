@@ -8,18 +8,8 @@ from pur_doc.constant import DB_URL, EX_RATE, LOCAL_SB_THRESHOLD
 CONN = sqlite3.connect(DB_URL, check_same_thread=False)
 CONN_f = sqlite3.connect(DB_URL, check_same_thread=False)
 
-# SQL Dict Factory Setting
-def dict_factory(cursor, row):
-    '''try to use normal dict to refactor'''
-
-    print(">>> dict_factory runing...")
-    d = {}
-    for idx, col in enumerate(cursor.description):
-        d[col[0]] = row[idx]
-    return d
-
-CONN_f.row_factory = dict_factory
-
+# CONN_f.row_factory = dict_factory
+CONN_f.row_factory = sqlite3.Row
 
 # build a default dict type whoes default value is itself
 class myDefaultDict(defaultdict):
@@ -238,20 +228,32 @@ def get_part_volume_in1000(project, part):
     return(result)
 
 
-def get_part_volume(project, part):
+def get_part_volume_sum(project, part):
     '''get part volume''' 
 
-    cursor = CONN.cursor()
+    cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT RP.volume FROM rfq_part AS RP
-              WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
+    cursor.execute('''SELECT SUM(volume) AS vol_sum FROM rfq_part
+              WHERE project=? AND part=?''', context)
 
-    rows = cursor.fetchall()
+    row = cursor.fetchone()
+    if row:
+        return row['vol_sum']
+    else:
+        return None
 
-    result = dict_factory_multi(cursor, rows, 'year')
 
-    return(result)
+def get_part_target_price_avg_100EUR(project, part):
+    pvo_part = get_part_pvo_part(project, part)
+    lifetime = get_part_lifetime(project, part)
+    vol_sum = get_part_volume_sum(project, part)
+    if pvo_part and lifetime and vol_sum:
+        target_price = pvo_part/lifetime/vol_sum/EX_RATE['EUR']*100
+        return target_price
+    else:
+        return None
+
 
 def get_part_target_price(project, part):
     '''get part target price''' 
@@ -290,17 +292,13 @@ def get_part_general_info(project, part):
     '''return a dictionary with titles and values about part general info
     (eg. part_description/mtl_group/etc) based on single part number (not project info involved)'''
 
-    cursor = CONN.cursor()
+    cursor = CONN_f.cursor()
     context = (project, part)
 
     cursor.execute('''SELECT DISTINCT * FROM part_data AS pd LEFT JOIN mgs USING(mtl_group)
                    WHERE pd.project=? AND pd.part=?''', context)
 
-    row = cursor.fetchone()
-
-    result = dict_factory_single_row(cursor, row)
-
-    return result
+    return cursor.fetchone()
 
 
 
@@ -372,14 +370,10 @@ def get_project_info(project):
     '''from TABLE: project_data + project_info'''
     cursor = CONN_f.cursor()
     context = (project,)
-
     cursor.execute(
         '''SELECT * FROM project_data LEFT JOIN project_info USING (project) 
             LEFT JOIN plant USING (plant) WHERE project=?''', context)
-
     row = cursor.fetchone()
-    print(f">>> titles are {cursor.description}.")
-    print(f">>> row is {row}.")
     return row
 
 
@@ -436,6 +430,38 @@ def get_part_quotation_pvo(project, part, vendor):
 
     return int(pvo)
 
+def get_part_pvo_part(project, part):
+    '''PVO only for parts'''
+    cursor = CONN_f.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT SUM(year_PVO) AS pvo_part FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''', context)
+
+    row = cursor.fetchone()
+    if row:
+        return row['pvo_part']
+    else:
+        return None
+
+def get_part_lifetime(project, part):
+    '''real lifetime according to row with volume from TABLE rfq_part'''
+
+    cursor = CONN_f.cursor()
+    context = (project, part)
+
+    cursor.execute('''SELECT COUNT(*) AS count FROM rfq_part WHERE project=? AND part=?''', context)
+    row = cursor.fetchone()
+    if row:
+        return row['count']
+    else:
+        return None
+
+
+
+
+def get_part_pvo_investment(project, part):
+    '''PVO only for investment'''
+    pass
 
 def get_part_pvo(project, part):
     '''return PVO by project and part'''
@@ -488,18 +514,20 @@ def get_project_part_list_sb(project):
     return parts_sb
 
 
-def get_part_volume_4project(project, part):
+def get_part_volume_avg(project, part):
     '''get part volume average'''
 
-    cursor = CONN.cursor()
+    cursor = CONN_f.cursor()
     context = (project, part)
 
     cursor.execute('''SELECT avg(volume) AS vol_avg FROM rfq_part AS RP
-              WHERE RP.project=? AND RP.part=? ''', context)
+              WHERE RP.project=? AND RP.part=? AND RP.volume != 0''', context)
 
-    row = cursor.fetchone()
-
-    return int(row[0])
+    rc = cursor.fetchone()
+    if rc:
+        return rc['vol_avg']
+    else:
+        return None
 
 def get_quotation_yearly_info(project, part, vendor):
     '''get yearly price as part of quoation dict'''
@@ -554,6 +582,18 @@ def get_vendor_list_4part(project, part):
 
     return result
 
+def get_part_list_by_project(project):
+    '''given a project, return a list with all parts by search the part_data sheet'''
+    cursor = CONN_f.cursor()
+    context = (project, )
+    cursor.execute(
+        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''', context)
+    rows = cursor.fetchall()
+    part_list = [item[0] for item in rows]
+    return part_list
+
+
+
 def get_part_list_by_project_vendor(project, vendor):
     '''function for nl_generate in route module'''
 
@@ -571,16 +611,14 @@ def get_part_list_by_project_vendor(project, vendor):
 def get_part_timing(project, part):
     '''get all fields from project timing sheet'''
 
-    cursor = CONN.cursor()
+    cursor = CONN_f.cursor()
     context = (project, part)
 
     cursor.execute('''SELECT * FROM project_timing 
                         WHERE project=? AND part=? ORDER BY part''', context)
 
     row = cursor.fetchone()
-    result = dict_factory_single_row(cursor, row)
-
-    return result
+    return row
 
 def get_vendor_by_part_in_dict(project, part):
     '''xxx'''
