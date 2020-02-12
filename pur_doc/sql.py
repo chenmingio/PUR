@@ -1,7 +1,8 @@
 '''build dict by sql query and factory'''
 import sqlite3
-import openpyxl
 from collections import defaultdict
+
+import openpyxl
 
 from pur_doc.constant import DB_URL, EX_RATE, LOCAL_SB_THRESHOLD
 
@@ -11,21 +12,22 @@ CONN_f = sqlite3.connect(DB_URL, check_same_thread=False)
 # CONN_f.row_factory = dict_factory
 CONN_f.row_factory = sqlite3.Row
 
+# Remind word for missing info
+REMIND_WORD = 'MISSING'
+
+
 # build a default dict type whoes default value is itself
 class myDefaultDict(defaultdict):
     __repr__ = dict.__repr__
+
 
 def rec_dd():
     return myDefaultDict(rec_dd)
 
 
-
-
 def dict_factory_single_row(cursor, row):
     '''used to build dictionary with data tiltle and data value.
     use cursor.description as iterable and build a dict with titile and value'''
-
-    result = rec_dd()
 
     for id_num, col in enumerate(cursor.description):
         if row:
@@ -54,33 +56,73 @@ def dict_factory_multi(cursor, rows, title):
 
     return result
 
+
 def assemble_nl_info(project, vendor, part_list):
 
-    result = rec_dd()
-    result['vendor'] = get_vendor_info(vendor)
-    result['project'] = get_project_info(project)
+    rc = dict()
 
-    quotation = rec_dd()
-    part_info = rec_dd()
-    volume_in_1000 = rec_dd()
-    volume_in_week = rec_dd()
-    invest = rec_dd()
+    def constant_factory():
+        return REMIND_WORD
 
-    for id, part in enumerate(part_list, start=1):
-        quotation['part_' + str(id)] = assemble_quotation_single_vendor(project, part, vendor)
-        part_info['part_' + str(id)] = get_part_general_info(project, part)
-        volume_in_1000['part_' + str(id)] = get_part_volume_in1000(project, part)
-        volume_in_week['part_' + str(id)] = get_part_volume_inweek(project, part, vendor)
-        invest['part_' + str(id)] = get_part_invest_target(project, part)
+    # project general info
+    project_dict = get_project_info(project)
+    if project_dict is None:
+        project_dict = defaultdict(constant_factory)
 
-    result['quotation'] = quotation
-    result['part_info'] = part_info
-    result['kvol'] = volume_in_1000 #use vol to short word length in word...
-    result['wvol'] = volume_in_week #use vol to short word length in word...
-    result['invest'] = invest
+    rc['project'] = project_dict
 
-    return result
+    # vendor general info
+    vendor_dict = get_vendor_info(vendor)
+    if vendor_dict is None:
+        vendor_dict = defaultdict(constant_factory)
 
+    rc['vendor'] = vendor_dict
+
+    # part info
+    # dict['parts'] is a list. The element of this list is a part_dictionary(defaultdict).
+    rc['parts'] = []
+    for part in part_list:
+
+        part_dict = defaultdict(constant_factory)
+
+        # general part info
+        part_info = get_part_general_info(project, part)
+        if part_info is None:
+            part_info = defaultdict(constant_factory)
+
+        part_dict['general'] = part_info
+        rc['parts'].append(part_dict)
+
+    return rc
+
+    # --------------------------------------------------------------
+    # result = rec_dd()
+    # result['vendor'] = get_vendor_info(vendor)
+    # result['project'] = get_project_info(project)
+
+    # quotation = rec_dd()
+    # part_info = rec_dd()
+    # volume_in_1000 = rec_dd()
+    # volume_in_week = rec_dd()
+    # invest = rec_dd()
+
+    # for id, part in enumerate(part_list, start=1):
+    #     quotation['part_' + str(id)] = assemble_quotation_single_vendor(
+    #         project, part, vendor)
+    #     part_info['part_' + str(id)] = get_part_general_info(project, part)
+    #     volume_in_1000['part_' + str(id)] = get_part_volume_in1000(
+    #         project, part)
+    #     volume_in_week['part_' + str(id)] = get_part_volume_inweek(
+    #         project, part, vendor)
+    #     invest['part_' + str(id)] = get_part_invest_target(project, part)
+
+    # result['quotation'] = quotation
+    # result['part_info'] = part_info
+    # result['kvol'] = volume_in_1000  #use vol to short word length in word...
+    # result['wvol'] = volume_in_week  #use vol to short word length in word...
+    # result['invest'] = invest
+
+    # return result
 
 
 def assemble_project(project, part_list):
@@ -93,9 +135,12 @@ def assemble_project(project, part_list):
 
     result['project']['part_list'] = part_list
 
-    result['vendors'] = assemble_vendors(project) # later use part_list as 2nd para, then reduce the vendors list
+    result['vendors'] = assemble_vendors(
+        project
+    )  # later use part_list as 2nd para, then reduce the vendors list
 
     return result
+
 
 def assemble_vendors(project):
     '''assemble all vendor info for the vendor list'''
@@ -140,8 +185,12 @@ def assemble_single_part(project, part):
     if result['general_info'] and result['volume']:
 
         result['general_info']['part_life_time'] = len(result['volume'])
-        result['general_info']['volume_avg'] = int(sum(result['volume'].values()) / result['general_info']['part_life_time'])
-        result['general_info']['target_price100_EUR'] = result['target_price']['target_price100_year_1'] / EX_RATE['EUR'] #result['general_info']['currency']]
+        result['general_info']['volume_avg'] = int(
+            sum(result['volume'].values()) /
+            result['general_info']['part_life_time'])
+        result['general_info']['target_price100_EUR'] = result['target_price'][
+            'target_price100_year_1'] / EX_RATE[
+                'EUR']  #result['general_info']['currency']]
         result['general_info']['pvo'] = get_part_pvo(project, part)
 
     result['quotations'] = assemble_quotation_single_part(project, part)
@@ -162,6 +211,7 @@ def assemble_quotation_single_vendor(project, part, vendor):
 
     return result
 
+
 def assemble_quotation_single_part(project, part):
     ''' get quotations from different vendors for a given project and part'''
 
@@ -172,7 +222,8 @@ def assemble_quotation_single_part(project, part):
     result = rec_dd()
 
     for id, vendor in enumerate(vendor_list, start=1):
-        result['vendor_' + str(id)] = assemble_quotation_single_vendor(project, part, vendor)
+        result['vendor_' + str(id)] = assemble_quotation_single_vendor(
+            project, part, vendor)
 
     return result
 
@@ -184,7 +235,8 @@ def get_part_volume_inweek(project, part, vendor):
     context = (vendor, )
 
     # get wpy of vendor
-    cursor.execute('''SELECT weeks_per_year AS wpy FROM vendor_production AS VP
+    cursor.execute(
+        '''SELECT weeks_per_year AS wpy FROM vendor_production AS VP
               WHERE VP.vendor=?''', context)
 
     row = cursor.fetchone()
@@ -196,7 +248,8 @@ def get_part_volume_inweek(project, part, vendor):
 
         context2 = (wpy, project, part)
 
-        cursor.execute('''SELECT ROUND(RP.volume/1000/?*1.3,2) AS vol FROM rfq_part AS RP
+        cursor.execute(
+            '''SELECT ROUND(RP.volume/1000/?*1.3,2) AS vol FROM rfq_part AS RP
                 WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context2)
 
         rows = cursor.fetchall()
@@ -218,7 +271,8 @@ def get_part_volume_yearly(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT RP.volume AS vol FROM rfq_part AS RP
+    cursor.execute(
+        '''SELECT RP.volume AS vol FROM rfq_part AS RP
               WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
 
     rows = cursor.fetchall()
@@ -232,7 +286,8 @@ def get_part_volume_sum(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT SUM(volume) AS vol_sum FROM rfq_part
+    cursor.execute(
+        '''SELECT SUM(volume) AS vol_sum FROM rfq_part
               WHERE project=? AND part=?''', context)
 
     row = cursor.fetchone()
@@ -243,11 +298,11 @@ def get_part_volume_sum(project, part):
 
 
 def get_part_target_price_avg_100EUR(project, part):
-    pvo_part = get_part_pvo_part(project, part)
+    pvo_part = get_part_target_pvo_part(project, part)
     lifetime = get_part_lifetime(project, part)
     vol_sum = get_part_volume_sum(project, part)
     if pvo_part and lifetime and vol_sum:
-        target_price = pvo_part/lifetime/vol_sum/EX_RATE['EUR']*100
+        target_price = pvo_part / lifetime / vol_sum / EX_RATE['EUR'] * 100
         return target_price
     else:
         return None
@@ -259,22 +314,24 @@ def get_part_target_price(project, part):
     cursor = CONN.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT RP.target_price100 FROM rfq_part AS RP
+    cursor.execute(
+        '''SELECT DISTINCT RP.target_price100 FROM rfq_part AS RP
               WHERE RP.project=? AND RP.part=? ORDER BY RP.year''', context)
 
     rows = cursor.fetchall()
 
     result = dict_factory_multi(cursor, rows, 'year')
 
-    return(result)
+    return (result)
+
 
 def get_part_invest_target(project, part):
     ''''''
     cursor = CONN.cursor()
     context = (project, part)
 
-
-    cursor.execute('''SELECT DISTINCT *
+    cursor.execute(
+        '''SELECT DISTINCT *
               FROM rfq_invest AS RI
               WHERE RI.project=? AND RI.part=? ORDER BY RI.tool''', context)
 
@@ -282,8 +339,7 @@ def get_part_invest_target(project, part):
 
     result = dict_factory_multi(cursor, rows, 'tool')
 
-    return(result)
-
+    return (result)
 
 
 def get_part_general_info(project, part):
@@ -293,10 +349,11 @@ def get_part_general_info(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT * FROM part_data AS pd LEFT JOIN mgm USING(mtl_group) LEFT JOIN mgs_sqe USING(mtl_group) LEFT JOIN plant USING(plant) WHERE pd.project=? AND pd.part=?''', context)
+    cursor.execute(
+        '''SELECT DISTINCT * FROM part_data AS pd LEFT JOIN mgm USING(mtl_group) LEFT JOIN mgs_sqe USING(mtl_group) LEFT JOIN plant USING(plant) WHERE pd.project=? AND pd.part=?''',
+        context)
 
     return cursor.fetchone()
-
 
 
 def search_invest_info(project, vendor, part):
@@ -304,7 +361,8 @@ def search_invest_info(project, vendor, part):
     cursor = CONN.cursor()
     context = (project, vendor, part)
 
-    cursor.execute('''SELECT * FROM nomi_invest AS NI WHERE NI.project=? AND
+    cursor.execute(
+        '''SELECT * FROM nomi_invest AS NI WHERE NI.project=? AND
     NI.vendor=? AND NI.part=? ORDER BY NI.tool''', context)
 
     rows = cursor.fetchall()
@@ -318,9 +376,11 @@ def get_vendor_list(project):
     '''prepare a list of vendors, whick later quotation of each part can refer to '''
 
     cursor = CONN.cursor()
-    context = (project,)
+    context = (project, )
 
-    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? ORDER BY vendor''', context)
+    cursor.execute(
+        '''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? ORDER BY vendor''',
+        context)
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
@@ -334,7 +394,9 @@ def get_nominated_vendor(project, part):
     cursor = CONN.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? AND part=? AND vendor_nominated='X' ORDER BY vendor''', context)
+    cursor.execute(
+        '''SELECT DISTINCT vendor FROM sourcing_concept WHERE project=? AND part=? AND vendor_nominated='X' ORDER BY vendor''',
+        context)
 
     row = cursor.fetchone()
 
@@ -347,9 +409,10 @@ def get_vendor_info(vendor):
     '''get all general vendor info'''
 
     cursor = CONN_f.cursor()
-    context = (vendor,)
+    context = (vendor, )
 
-    cursor.execute('''SELECT * FROM
+    cursor.execute(
+        '''SELECT * FROM
     vendor_contact AS VC
     LEFT JOIN vendor_basic AS VB ON VC.vendor=VB.vendor
     LEFT JOIN contract AS C ON VC.vendor=C.vendor
@@ -368,7 +431,7 @@ def get_vendor_info(vendor):
 def get_project_info(project):
     '''from TABLE: project_data + project_info'''
     cursor = CONN_f.cursor()
-    context = (project,)
+    context = (project, )
     cursor.execute(
         '''SELECT * FROM project_data LEFT JOIN project_info USING (project)
             LEFT JOIN plant USING (plant) WHERE project=?''', context)
@@ -383,7 +446,8 @@ def get_project_part_list(project):
     context = (project, )
 
     cursor.execute(
-        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''', context)
+        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''',
+        context)
 
     rows = cursor.fetchall()
     result = [item[0] for item in rows]
@@ -398,12 +462,14 @@ def get_part_quotation_qs(project, part, vendor):
     context = (project, part, vendor)
 
     cursor.execute(
-        '''SELECT SUM(qs) FROM nomi_part WHERE project=? AND part=? AND vendor=?''', context)
+        '''SELECT SUM(qs) FROM nomi_part WHERE project=? AND part=? AND vendor=?''',
+        context)
 
     row = cursor.fetchone()
     result = row[0] or 0
 
     return result
+
 
 def get_part_quotation_pvo(project, part, vendor):
     '''return PVO by project and part and vendor'''
@@ -412,13 +478,17 @@ def get_part_quotation_pvo(project, part, vendor):
     context = (project, part, vendor)
 
     # get price pvo
-    cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT project, part, year, volume*price100/100 AS year_PVO FROM rfq_part NATURAL JOIN nomi_part WHERE project=? AND part=? AND vendor=?)''', context)
+    cursor.execute(
+        '''SELECT SUM(year_PVO) FROM (SELECT project, part, year, volume*price100/100 AS year_PVO FROM rfq_part NATURAL JOIN nomi_part WHERE project=? AND part=? AND vendor=?)''',
+        context)
 
     row = cursor.fetchone()
 
     part_pvo = row[0] if row[0] else 0
 
-    cursor.execute('''SELECT SUM(invest_cost) FROM (SELECT tool_cost+further_invest_cost AS invest_cost FROM nomi_invest WHERE project=? AND part=? AND vendor=?)''', context)
+    cursor.execute(
+        '''SELECT SUM(invest_cost) FROM (SELECT tool_cost+further_invest_cost AS invest_cost FROM nomi_invest WHERE project=? AND part=? AND vendor=?)''',
+        context)
 
     row = cursor.fetchone()
 
@@ -429,18 +499,53 @@ def get_part_quotation_pvo(project, part, vendor):
 
     return int(pvo)
 
-def get_part_pvo_part(project, part):
-    '''PVO only for parts'''
+
+def get_part_target_pvo_part(project, part):
+    '''PVO target only for parts'''
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT SUM(year_PVO) AS pvo_part FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''', context)
+    cursor.execute(
+        '''SELECT SUM(year_PVO) AS target_pvo_part FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''',
+        context)
 
     row = cursor.fetchone()
     if row:
-        return row['pvo_part']
+        return row['target_pvo_part']
     else:
         return None
+
+
+def get_part_target_pvo_investment(project, part):
+    '''PVO target only for investment'''
+    cursor = CONN_f.cursor()
+    context = (project, part)
+
+    cursor.execute(
+        '''SELECT SUM(invest_target) AS invest_target_pvo FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''',
+        context)
+
+    row = cursor.fetchone()
+    if row:
+        return row['invest_target_pvo']
+    else:
+        return None
+
+
+def get_part_target_pvo_total(project, part):
+    '''add target pvo of part and investment together'''
+    target_pvo_part = get_part_target_pvo_part(project, part)
+    target_pvo_investment = get_part_target_pvo_investment(project, part)
+
+    if target_pvo_investment and target_pvo_part:
+        return (target_pvo_investment + target_pvo_part)
+    elif target_pvo_part:
+        return target_pvo_part
+    elif target_pvo_investment:
+        return target_pvo_investment
+    else:
+        return None
+
 
 def get_part_lifetime(project, part):
     '''real lifetime according to row with volume from TABLE rfq_part'''
@@ -448,7 +553,9 @@ def get_part_lifetime(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT COUNT(*) AS count FROM rfq_part WHERE project=? AND part=?''', context)
+    cursor.execute(
+        '''SELECT COUNT(*) AS count FROM rfq_part WHERE project=? AND part=?''',
+        context)
     row = cursor.fetchone()
     if row:
         return row['count']
@@ -456,24 +563,22 @@ def get_part_lifetime(project, part):
         return None
 
 
-
-
-def get_part_pvo_investment(project, part):
-    '''PVO only for investment'''
-    pass
-
 def get_part_pvo(project, part):
     '''return PVO by project and part'''
 
     cursor = CONN.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''', context)
+    cursor.execute(
+        '''SELECT SUM(year_PVO) FROM (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part WHERE project=? AND part=?)''',
+        context)
 
     row = cursor.fetchone()
     part_pvo = row[0] if row[0] else 0
 
-    cursor.execute('''SELECT SUM(invest_target) FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''', context)
+    cursor.execute(
+        '''SELECT SUM(invest_target) FROM (SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest WHERE project=? AND part=?)''',
+        context)
 
     row = cursor.fetchone()
 
@@ -492,7 +597,8 @@ def get_part_risk(project, part):
     context = (project, part)
 
     cursor.execute(
-        '''SELECT risk_level FROM part_data WHERE project=? AND part=?''', context)
+        '''SELECT risk_level FROM part_data WHERE project=? AND part=?''',
+        context)
 
     row = cursor.fetchone()
 
@@ -507,7 +613,8 @@ def get_project_part_list_sb(project):
     parts_sb = []
 
     for part in all_parts:
-        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD or get_part_risk(project, part) == 'H'):
+        if (get_part_pvo(project, part) > LOCAL_SB_THRESHOLD
+                or get_part_risk(project, part) == 'H'):
             parts_sb.append(part)
 
     return parts_sb
@@ -519,7 +626,8 @@ def get_part_volume_avg(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT avg(volume) AS vol_avg FROM rfq_part AS RP
+    cursor.execute(
+        '''SELECT avg(volume) AS vol_avg FROM rfq_part AS RP
               WHERE RP.project=? AND RP.part=? AND RP.volume != 0''', context)
 
     rc = cursor.fetchone()
@@ -528,13 +636,15 @@ def get_part_volume_avg(project, part):
     else:
         return None
 
+
 def get_quotation_yearly_info(project, part, vendor):
     '''get yearly price as part of quoation dict'''
 
     cursor = CONN.cursor()
     context = (project, part, vendor)
 
-    cursor.execute('''SELECT price100, qs FROM nomi_part AS NP
+    cursor.execute(
+        '''SELECT price100, qs FROM nomi_part AS NP
               WHERE NP.project=? AND NP.part=? AND NP.vendor=?''', context)
 
     rows = cursor.fetchall()
@@ -543,14 +653,17 @@ def get_quotation_yearly_info(project, part, vendor):
 
     return result
 
+
 def get_quotation_invest_info(project, part, vendor):
     '''get yearly price as part of quoation dict'''
 
     cursor = CONN.cursor()
     context = (project, part, vendor)
 
-    cursor.execute('''SELECT cavity, tool_cost, copy_tool_cost, further_invest_cost, nomi_ppap_date, nomi_fot_date, nomi_loops
-                     FROM nomi_invest AS NI WHERE NI.project=? AND NI.part=? AND NI.vendor=? ORDER BY tool''', context)
+    cursor.execute(
+        '''SELECT cavity, tool_cost, copy_tool_cost, further_invest_cost, nomi_ppap_date, nomi_fot_date, nomi_loops
+                     FROM nomi_invest AS NI WHERE NI.project=? AND NI.part=? AND NI.vendor=? ORDER BY tool''',
+        context)
 
     rows = cursor.fetchall()
 
@@ -565,7 +678,8 @@ def get_vendor_list_under_part(project, part):
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT DISTINCT vendor FROM sourcing_concept
+    cursor.execute(
+        '''SELECT DISTINCT vendor FROM sourcing_concept
                         WHERE project=? AND part=? ORDER BY vendor''', context)
 
     rows = cursor.fetchall()
@@ -577,11 +691,11 @@ def get_part_list_by_project(project):
     cursor = CONN_f.cursor()
     context = (project, )
     cursor.execute(
-        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''', context)
+        '''SELECT DISTINCT part FROM part_data WHERE project=? ORDER BY part''',
+        context)
     rows = cursor.fetchall()
     part_list = [item[0] for item in rows]
     return part_list
-
 
 
 def get_part_list_by_project_vendor(project, vendor):
@@ -590,7 +704,8 @@ def get_part_list_by_project_vendor(project, vendor):
     cursor = CONN.cursor()
     context = (project, vendor)
 
-    cursor.execute('''SELECT DISTINCT part FROM nomi_part
+    cursor.execute(
+        '''SELECT DISTINCT part FROM nomi_part
                         WHERE project=? AND vendor=? ORDER BY part''', context)
 
     rows = cursor.fetchall()
@@ -598,17 +713,20 @@ def get_part_list_by_project_vendor(project, vendor):
 
     return result
 
+
 def get_part_timing(project, part):
     '''get all fields from project timing sheet'''
 
     cursor = CONN_f.cursor()
     context = (project, part)
 
-    cursor.execute('''SELECT * FROM project_timing
+    cursor.execute(
+        '''SELECT * FROM project_timing
                         WHERE project=? AND part=? ORDER BY part''', context)
 
     row = cursor.fetchone()
     return row
+
 
 def get_vendor_by_part_in_dict(project, part):
     '''xxx'''
@@ -620,6 +738,7 @@ def get_vendor_by_part_in_dict(project, part):
         result['vendor_' + str(id)] = vendor_list[id - 1]
 
     return result
+
 
 def get_all_project_list():
     '''used for all projects test'''
