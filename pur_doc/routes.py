@@ -57,7 +57,7 @@ def sb_form():
 @post('/sb')
 @view('sb_parts.html', template_lookup=[TEMPLATE_PATH])
 def sb_parts_form():
-    project = request.forms.get('project') 
+    project = request.forms.get('project')
 
     part_list = sql.get_project_part_list(project)
 
@@ -90,7 +90,7 @@ def mm_form():
 @post('/mm')
 @view('mm_parts.html', template_lookup=[TEMPLATE_PATH])
 def mm_return():
-    project = request.forms.get('project') 
+    project = request.forms.get('project')
 
     part_list = sql.get_project_part_list(project)
 
@@ -108,7 +108,7 @@ def mm_generation():
 
     if 'all' in selected_part_list:
         selected_part_list = sql.get_project_part_list(project)
-    
+
     xls_inject.xls_inject_mm(project, selected_part_list)
 
     return static_file('sourcing_mm_output.xlsx', root='./output/')
@@ -121,7 +121,7 @@ def nl_form():
 @post('/nl')
 @view('nl_parts.html', template_lookup=[TEMPLATE_PATH])
 def nl_parts_form():
-    project = request.forms.get('project') 
+    project = request.forms.get('project')
     vendor = request.forms.get('vendor')
 
     part_list = sql.get_part_list_by_project_vendor(project, vendor)
@@ -163,7 +163,7 @@ def nl_pcb_form():
 @post('/nl_pcb')
 @view('nl_pcb_parts.html', template_lookup=[TEMPLATE_PATH])
 def nl_pcb_parts_form():
-    project = request.forms.get('project') 
+    project = request.forms.get('project')
     vendor = request.forms.get('vendor')
 
     part_list = sql.get_part_list_by_project_vendor(project, vendor)
@@ -200,7 +200,7 @@ def risk_eval_get():
 @view('re_parts.html', template_lookup=[TEMPLATE_PATH])
 def risk_eval_parts():
     '''return parts for selection'''
-    project = request.forms.get('project') 
+    project = request.forms.get('project')
 
     part_list = sql.get_project_part_list(project)
 
@@ -218,15 +218,15 @@ def risk_eval_generation():
 
     if 'all' in selected_part_list:
         selected_part_list = sql.get_project_part_list(project)
-    
+
     logging.info('Risk Eval requested for project %s w/ parts %s', project, str(selected_part_list))
-    
+
     xls_inject.xls_inject_risk_eval(project, selected_part_list)
 
     logging.info('Risk Eval generated for project %s w/ parts %s', project, str(selected_part_list))
 
     return static_file('risk_eval_output.xlsx', root='./output/')
-    
+
 
 @get('/ss')
 @view('supplier_selection.html', template_lookup=[TEMPLATE_PATH])

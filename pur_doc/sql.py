@@ -43,9 +43,10 @@ def assemble_nl_info(project, vendor, part_list):
 
     # sop/eop
     sop_tuple = get_project_sop_eop(project)
-    if sop_tuple:
-        rc['sop'] = sop_tuple[0]
-        rc['eop'] = sop_tuple[1]
+    if sop_tuple is None:
+        sop_tuple = defaultdict(constant_factory)
+
+    rc['lifetime'] = sop_tuple
 
     # quick reference in Jinja
     rc['plant_name'] = project_dict['plant_name']
@@ -97,13 +98,7 @@ def get_project_sop_eop(project):
         '''SELECT MIN(year) AS sop, MAX(year) AS EOP FROM rfq_part
               WHERE project=? AND volume > 0''', context)
 
-    row = cursor.fetchone()
-    if row:
-        sop = row['sop']
-        eop = row['eop']
-        return (sop, eop)
-    else:
-        return None
+    return cursor.fetchone()
 
 
 def get_vendor_weeks_per_year(vendor):
@@ -119,8 +114,6 @@ def get_vendor_weeks_per_year(vendor):
     row = cursor.fetchone()
     if row:
         return row['wpy']
-    else:
-        return None
 
 
 def get_part_volume_weekly(project, part, vendor):
@@ -174,19 +167,16 @@ def get_part_volume_sum(project, part):
     row = cursor.fetchone()
     if row:
         return row['vol_sum']
-    else:
-        return None
 
 
 def get_part_target_price_avg_100EUR(project, part):
     pvo_part = get_part_target_pvo_part(project, part)
     lifetime = get_part_lifetime(project, part)
     vol_sum = get_part_volume_sum(project, part)
+
     if pvo_part and lifetime and vol_sum:
         target_price = pvo_part / lifetime / vol_sum / EX_RATE['EUR'] * 100
         return target_price
-    else:
-        return None
 
 
 def get_part_target_price(project, part):
@@ -235,13 +225,11 @@ project info also involved for nr_id cross location,
     context = (project, part)
 
     cursor.execute(
-        '''SELECT DISTINCT * FROM part_data AS pd LEFT JOIN mgm USING(
-mtl_group,
-) LEFT JOIN mgs_sqe USING(
-mtl_group,
-) LEFT JOIN plant USING(
-plant,
-) WHERE pd.project=? AND pd.part=?''', context)
+        '''SELECT DISTINCT * FROM part_data AS pd
+        LEFT JOIN mgm USING(mtl_group)
+        LEFT JOIN mgs_sqe USING(mtl_group)
+        LEFT JOIN plant USING(plant)
+        WHERE pd.project=? AND pd.part=?''', context)
 
     return cursor.fetchone()
 
@@ -346,8 +334,7 @@ def get_project_part_list(project):
 
     return result
 
-
-# def get_part_quotation_qs(project, part, vendor):
+    # def get_part_quotation_qs(project, part, vendor):
     '''get total quick saving for a quotation'''
 
     cursor = CONN.cursor()
@@ -408,9 +395,9 @@ def get_part_target_pvo_part(project, part):
     context = (project, part)
 
     cursor.execute(
-        '''SELECT SUM(year_PVO,) AS target_pvo_part FROM
+        '''SELECT SUM(year_PVO) AS target_pvo_part FROM
         (SELECT volume*target_price100/100 AS year_PVO FROM rfq_part
-        WHERE project=? AND part=?,)''', context)
+        WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
     if row:
@@ -425,9 +412,11 @@ def get_part_target_pvo_investment(project, part):
     context = (project, part)
 
     cursor.execute(
-        '''SELECT SUM(invest_target,) AS invest_target_pvo FROM (
-SELECT cost_target+further_invest_cost AS invest_target FROM rfq_invest
-        WHERE project=? AND part=?,)''', context)
+        '''SELECT SUM(invest_target) AS invest_target_pvo
+        FROM (
+            SELECT cost_target+further_invest_cost AS invest_target
+                FROM rfq_invest
+            WHERE project=? AND part=?)''', context)
 
     row = cursor.fetchone()
     if row:
@@ -451,7 +440,6 @@ def get_part_target_pvo_total(project, part):
         return None
 
 
-
 def get_part_lifetime(project, part):
     '''real lifetime according to row with volume from TABLE rfq_part'''
 
@@ -459,9 +447,8 @@ def get_part_lifetime(project, part):
     context = (project, part)
 
     cursor.execute(
-        '''SELECT COUNT(
-*,
-) AS count FROM rfq_part WHERE project=? AND part=?''', context)
+        '''SELECT COUNT(*) AS count
+        FROM rfq_part WHERE project=? AND part=?''', context)
     row = cursor.fetchone()
     if row:
         return row['count']
@@ -572,22 +559,13 @@ def get_quotation_invest_info(project, part, vendor):
     context = (project, part, vendor)
 
     cursor.execute(
-        '''SELECT cavity,
- tool_cost,
- copy_tool_cost,
- further_invest_cost,
- nomi_ppap_date,
- nomi_fot_date,
- nomi_loops
-                     FROM nomi_invest AS NI
+        '''SELECT * FROM rfq_invest LEFT JOIN nomi_invest AS NI
+        USING (project, part, vendor, tool)
         WHERE NI.project=? AND NI.part=? AND NI.vendor=? ORDER BY tool''',
         context)
 
     rows = cursor.fetchall()
-
-    result = dict_factory_multi(cursor, rows, 'tool')
-
-    return result
+    return rows
 
 
 def get_vendor_list_under_part(project, part):

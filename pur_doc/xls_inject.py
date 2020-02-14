@@ -75,8 +75,9 @@ def xls_inject_risk_eval(project, part_list):
         part_timing = sql.get_part_timing(*context)
         if part_timing:
             ppap = part_timing['ppap_date']
-            sheet.cell(row=11,
-                       column=column).value = ppap[5:7] + '.' + ppap[0:4]
+            if ppap:
+                sheet.cell(row=11,
+                        column=column).value = ppap[5:7] + '.' + ppap[0:4]
 
         # next part
         n += 1
