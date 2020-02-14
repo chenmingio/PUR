@@ -120,9 +120,9 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     # segment (pass)
 
     # yearly volume
-    volume_list = sql.get_part_volume_yearly(project, part)
-    if volume_list:
-        for i, vol in enumerate(volume_list):
+    volume_dict = sql.get_part_volume_yearly(project, part)
+    if volume_dict:
+        for i, vol in enumerate(volume_dict):
             if i < 11:
                 sheet.cell(row=16, column=5 + i).value = vol
 
@@ -134,6 +134,8 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     workbook.save(output_file_name)
 
     return output_file_name
+
+
 
 
 def xls_inject_cbd_project(project):

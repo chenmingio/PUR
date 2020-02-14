@@ -347,7 +347,7 @@ def get_project_part_list(project):
     return result
 
 
-def get_part_quotation_qs(project, part, vendor):
+# def get_part_quotation_qs(project, part, vendor):
     '''get total quick saving for a quotation'''
 
     cursor = CONN.cursor()

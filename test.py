@@ -1,6 +1,6 @@
 from openpyxl import load_workbook
 
-from pur_doc import constant, doc_inject, sql, word, xls_inject
+from pur_doc import constant, sql, word, xls_inject
 
 # test projects
 test_project_blank = ""
@@ -26,6 +26,9 @@ test_vendor_3 = "fake_vendor"
 # test project/vendor/part_list tuple
 test_project_vendor_parts_tuple = ("1111E.001169", "48200041",
                                    ["935.085-00", "935.085-10"])
+
+# test project/part/vendor tuple
+test_project_part_vendor_tuple = ("1111E.001169", "935.085-00", "48200041")
 
 # ALL_PROJECT_LIST = sql.get_all_project_list("1111E.001236", )
 
@@ -133,8 +136,10 @@ def test_get_part_timing():
 
 def test_get_vendor_info():
     print(">>>vendor info", sql.get_vendor_info(test_vendor_2).keys())
-    print(">>>vendor info", sql.get_vendor_info(test_vendor_2).keys())
-    print(">>>vendor info", sql.get_vendor_info(test_vendor_2).keys())
+    print(">>>vendor info", sql.get_vendor_info(test_vendor_2)['vendor_name'])
+    print(">>>vendor info",
+          sql.get_vendor_info(test_vendor_2)['quality_mgnt_signed'])
+
 
 
 def test_get_part_volume_yearly():
@@ -146,6 +151,17 @@ def test_get_part_volume_yearly():
           sql.get_part_volume_yearly(*test_project_part_tuple_3))
     print(">>>volue yearly: ",
           sql.get_part_volume_yearly(*test_project_part_tuple_4))
+
+
+def test_project_sop_eop():
+    print(">>>project sop/eop ",
+          sql.get_project_sop_eop(test_project_1))
+    print(">>>project sop/eop ",
+          sql.get_project_sop_eop(test_project_fake))
+    print(">>>project sop/eop ",
+          sql.get_project_sop_eop(test_project_blank))
+    print(">>>project sop/eop ",
+          sql.get_project_sop_eop(test_project_none))
 
 
 # test injection function
@@ -203,3 +219,9 @@ def test_generate_nl():
 def test_assemble_nl_info():
     print(">>> nl info: ",
           sql.assemble_nl_info(*test_project_vendor_parts_tuple))
+
+
+def test_get_part_volume_weekly():
+    print(">>> weekly volume: ",
+          sql.get_part_volume_weekly(*test_project_part_vendor_tuple))
+
