@@ -1,6 +1,9 @@
 from openpyxl import load_workbook
 
+import os
 from pur_doc import constant, sql, word, xls_inject
+
+from pprint import  pprint
 
 # test projects
 test_project_blank = ""
@@ -10,6 +13,9 @@ test_project_fake = "fake_project_id"
 
 # test single parts
 
+# project_vendor_tuple1
+project_vendor_tuple1 = ("1111E.001169", "48200041")
+project_vendor_tuple2 = ("1361P.000054", "49100612")
 # test project/part tuple
 test_project_part_tuple_1 = ("1111E.001236", "178.576-15")
 test_project_part_tuple_2 = ("1111E.001236", "191.674-01")
@@ -27,21 +33,28 @@ test_vendor_3 = "fake_vendor"
 test_project_part_list_tuple_1 = ("1111E.001169", ["935.085-00", "935.085-10"])
 
 # test project/vendor/part_list tuple
-test_project_vendor_parts_tuple = ("1111E.001169", "48200041",
-                                   ["935.085-00", "935.085-10"])
+test_project_vendor_parts_tuple_1 = ("1111E.001169", "48200041",
+                                     ["935.085-00", "935.085-10"])
+
+test_project_vendor_parts_tuple_2 = ("1361P.000054", "49100612",
+                                     ["187.119-00", "187.120-00", "187.121-00"])
 
 # test project/part/vendor tuple
 test_project_part_vendor_tuple = ("1111E.001169", "935.085-00", "48200041")
 
+
 # ALL_PROJECT_LIST = sql.get_all_project_list("1111E.001236", )
+
+def test_show_cwd():
+    cwd = os.getcwd()
+    print(">>> cwd: ", cwd)
 
 
 def test_get_project_info():
-
     assert sql.get_project_info(test_project_1)['project'] == test_project_1
-    assert sql.get_project_info(test_project_blank) == None
-    assert sql.get_project_info(test_project_fake) == None
-    assert sql.get_project_info(test_project_none) == None
+    assert sql.get_project_info(test_project_blank) is None
+    assert sql.get_project_info(test_project_fake) is None
+    assert sql.get_project_info(test_project_none) is None
     print(sql.get_project_info(test_project_1).keys())
     print("sop date: ", sql.get_project_info(test_project_1)['sop'])
 
@@ -145,15 +158,19 @@ def test_get_vendor_info():
 
 
 def test_get_part_volume_yearly():
-    print(">>>volue yearly: ",
+    print(">>>volume yearly: ",
           sql.get_part_volume_yearly(*test_project_part_tuple_1))
-    print(">>>volue yearly: ",
+    print(">>>volume yearly: ",
           sql.get_part_volume_yearly(*test_project_part_tuple_2))
-    print(">>>volue yearly: ",
+    print(">>>volume yearly: ",
           sql.get_part_volume_yearly(*test_project_part_tuple_3))
-    print(">>>volue yearly: ",
+    print(">>>volume yearly: ",
           sql.get_part_volume_yearly(*test_project_part_tuple_4))
 
+
+def test_get_part_price_yearly():
+    print(">>>price yearly: ",
+          sql.get_part_price_yearly(*test_project_part_vendor_tuple))
 
 def test_project_sop_eop():
     print(">>>project sop/eop ", sql.get_project_sop_eop(test_project_1))
@@ -168,7 +185,6 @@ def test_xls_inject_risk_eval():
 
 
 def test_xls_inject_cbd_single():
-
     # file prep
     TEMPLATE_PATH = constant.TEMPLATE_PATH
     file_name = 'cbd'
@@ -183,12 +199,10 @@ def test_xls_inject_cbd_single():
 
 
 def test_xls_inject_cbd_project():
-
     xls_inject.xls_inject_cbd_project(test_project_1)
 
 
 def test_xls_inject_ss_single():
-
     # file prep
     TEMPLATE_PATH = constant.TEMPLATE_PATH
     file_name = 'supplier_selection'
@@ -202,7 +216,6 @@ def test_xls_inject_ss_single():
 
 
 def test_xls_inject_ss_project():
-
     xls_inject.xls_inject_ss_project(test_project_1)
 
 
@@ -211,14 +224,32 @@ def test_xls_inject_ss_project():
 
 
 def test_generate_nl():
-    word.generate_nl(*test_project_vendor_parts_tuple)
+    word.generate_nl(*test_project_vendor_parts_tuple_1)
 
 
 def test_assemble_nl_info():
     print(">>> nl info: ",
-          sql.assemble_nl_info(*test_project_vendor_parts_tuple))
+          sql.assemble_nl_info(*test_project_vendor_parts_tuple_1))
 
 
 def test_get_part_volume_weekly():
     print(">>> weekly volume: ",
           sql.get_part_volume_weekly(*test_project_part_vendor_tuple))
+
+
+def test_get_nl_tool_info():
+    rows = sql.get_nl_tool_info(*test_project_vendor_parts_tuple_2)
+    for row in rows:
+        print(">>> tool info ")
+        print(">>> part info", row['part'], ' ', row['tool'], ' ', row['tool_description'])
+
+
+def test_get_nl_invest_info():
+    rows = sql.get_nl_invest_info(*test_project_vendor_parts_tuple_2)
+    for row in rows:
+        print(">>> invest info ")
+        print(">>> part info", row['part'], ' ', row['invest_name'], ' ', row['cost'])
+
+def test_get_project_vendor_qs_yearly():
+    print(">>> yearly qs: ", sql.get_project_vendor_qs_yearly(*project_vendor_tuple1))
+    print(">>> yearly qs: ", sql.get_project_vendor_qs_yearly(*project_vendor_tuple2))
