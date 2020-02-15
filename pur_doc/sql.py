@@ -1,9 +1,8 @@
 """build dict by sql query and factory"""
 import sqlite3
 from collections import defaultdict
-from pprint import  pprint
+from pprint import pprint
 from pur_doc.constant import DB_URL, EX_RATE, LOCAL_SB_THRESHOLD
-
 
 CONN = sqlite3.connect(DB_URL, check_same_thread=False)
 CONN_f = sqlite3.connect(DB_URL, check_same_thread=False)
@@ -50,6 +49,7 @@ def assemble_nl_info(project, vendor, part_list):
         sop_tuple = defaultdict(constant_factory)
 
     rc['lifetime'] = sop_tuple
+    # TODO true lifetime should get from extra yearly project volume input. Fix later when available.
 
     # quick reference plant_name
     rc['plant_name'] = project_dict['plant_name']
@@ -58,8 +58,12 @@ def assemble_nl_info(project, vendor, part_list):
     vendor_dict = get_vendor_info(vendor)
     rc['vendor'] = vendor_dict or defaultdict(constant_factory)
 
-    # investment
-    invest = get_nl_tool_info(project, vendor, part_list)
+    # tool
+    tools = get_nl_tool_info(project, vendor, part_list)
+    rc['tools'] = tools or defaultdict(constant_factory)
+
+    # invest
+    invest = get_nl_invest_info(project, vendor, part_list)
     rc['invest'] = invest or defaultdict(constant_factory)
 
     # quick reference: vendor_name
@@ -578,12 +582,13 @@ def get_nl_tool_info(project, vendor, part_list):
                     FROM rfq_invest LEFT JOIN nomi_invest AS NI
                 USING (project, part, tool)
                 WHERE NI.project=? AND NI.vendor=? AND NI.part IN ({placeholders})
-                ORDER BY part"""
+                ORDER BY part, tool"""
 
     cursor.execute(query, context)
 
     rows = cursor.fetchall()
     return rows
+
 
 def get_nl_invest_info(project, vendor, part_list):
     """same as nl_tool_info function"""
