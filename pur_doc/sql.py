@@ -602,7 +602,7 @@ def get_nl_invest_info(project, vendor, part_list):
                 FROM rfq_invest  AS RI LEFT JOIN nomi_invest AS NI
                 USING (project, part, tool)
                 WHERE NI.project=? AND NI.vendor=? AND NI.part IN ({placeholders}) AND invest_name IS NOT NULL
-                ORDER BY part"""
+                ORDER BY part, tool"""
 
     cursor.execute(query, context)
 
@@ -633,24 +633,21 @@ def get_part_list_by_project(project):
         """SELECT DISTINCT part FROM part_data
         WHERE project=? ORDER BY part""", context)
     rows = cursor.fetchall()
-    part_list = [item[0] for item in rows]
-    return part_list
+    return [item[0] for item in rows]
 
 
 def get_part_list_by_project_vendor(project, vendor):
     """function for nl_generate in route module"""
 
-    cursor = CONN.cursor()
+    cursor = CONN_.cursor()
     context = (project, vendor)
 
     cursor.execute(
         """SELECT DISTINCT part FROM nomi_part
-                        WHERE project=? AND vendor=? ORDER BY part""", context)
+                WHERE project=? AND vendor=? ORDER BY part""", context)
 
     rows = cursor.fetchall()
-    result = [row[0] for row in rows]
-
-    return result
+    return [item[0] for item in rows]
 
 
 def get_part_timing(project, part):

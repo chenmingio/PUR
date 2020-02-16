@@ -12,7 +12,6 @@ CBD_SHEET_PASSWORD = constant.cbd_sheet_password
 
 
 def xls_inject_risk_eval(project, part_list):
-
     file_name = 'risk_eval'
     file_path = TEMPLATE_PATH + file_name + '.xlsx'
     sheet_name = 'Risk Evaluation'
@@ -77,7 +76,7 @@ def xls_inject_risk_eval(project, part_list):
             ppap = part_timing['ppap_date']
             if ppap:
                 sheet.cell(row=11,
-                        column=column).value = ppap[5:7] + '.' + ppap[0:4]
+                           column=column).value = ppap[5:7] + '.' + ppap[0:4]
 
         # next part
         n += 1
@@ -116,7 +115,7 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
         # use sop year. First check if is digit
         sop_year = project_info['sop'][6:10]
         if sop_year.isdigit():
-            sheet['I10'] = int(sop_year)
+            sheet['E15'] = int(sop_year)
 
     # segment (pass)
 
@@ -137,10 +136,8 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     return output_file_name
 
 
-
-
 def xls_inject_cbd_project(project):
-    '''output CBD in zip file'''
+    """output CBD in zip file"""
 
     # file prep
     file_name = 'cbd'
@@ -156,11 +153,10 @@ def xls_inject_cbd_project(project):
     output_file_list = []
 
     for part in part_list:
-        # parpare vendor list
+        # prepare vendor list
         vendor_list = sql.get_vendor_list_under_part(project, part)
 
         for vendor in vendor_list:
-
             # run the injection and return the file name
             output_file_name = xls_inject_cbd_single(project, part, vendor, wb)
             output_file_list.append(output_file_name)
@@ -176,7 +172,7 @@ def xls_inject_cbd_project(project):
 
 
 def xls_inject_ss_project(project):
-    '''output supplier selection in zip file'''
+    """output supplier selection in zip file"""
 
     # file prep
     file_name = 'supplier_selection'
@@ -192,13 +188,12 @@ def xls_inject_ss_project(project):
     output_file_list = []
 
     for part in part_list:
-
         # run the injection and return the file name
         output_file_name = xls_inject_ss_single(project, part, wb)
         output_file_list.append(output_file_name)
 
     # zip the output files
-    with zipfile.ZipFile('./output/ss.zip', 'w') as new_zip:
+    with zipfile.ZipFile('./output/supplier_selection.zip', 'w') as new_zip:
         for name in output_file_list:
             new_zip.write(name)
 
@@ -208,7 +203,6 @@ def xls_inject_ss_project(project):
 
 
 def xls_inject_ss_single(project, part, wb):
-
     # load the sheet
     sheet_name = 'Supplier Selection'
     sheet = wb[sheet_name]
@@ -323,7 +317,7 @@ def xls_inject_sb(project, part_list):
             sheet['H10'] = int(sop_year)
 
         ## project yearly volume.
-        #TODO after you build the project extra DB, update these code with iteration style
+        # TODO after you build the project extra DB, update these code with iteration style
         sheet['H10'] = project_info['year_1_volume']
         sheet['L10'] = project_info['year_2_volume']
         sheet['P10'] = project_info['year_3_volume']
@@ -360,15 +354,15 @@ def xls_inject_sb(project, part_list):
         if part_timing:
             sheet.cell(row=30, column=part_timing_column_num
                        ).value = part_timing['nomination_date']
-            #TODO FOT timing missing
-            #TODO c-sample timing missing
+            # TODO FOT timing missing
+            # TODO c-sample timing missing
             sheet.cell(
                 row=33,
                 column=part_timing_column_num).value = part_timing['ppap_date']
 
         part_info_i += 1
 
-    #BOM cost section
+    # BOM cost section
     bom_part_row_i = 0
     for part in part_list:
         bom_part_row_num = 43 + bom_part_row_i
@@ -392,7 +386,7 @@ def xls_inject_sb(project, part_list):
 
     bom_part_row_i += 1
 
-    #Concept: Single Part Status
+    # Concept: Single Part Status
     concept_single_part_row_i = 0
     for part in part_list:
         concept_single_part_row_num = 62 + 4 * concept_single_part_row_i

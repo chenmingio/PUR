@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 import os
 from pur_doc import constant, sql, word, xls_inject
 
-from pprint import  pprint
+from pprint import pprint
 
 # test projects
 test_project_blank = ""
@@ -172,6 +172,7 @@ def test_get_part_price_yearly():
     print(">>>price yearly: ",
           sql.get_part_price_yearly(*test_project_part_vendor_tuple))
 
+
 def test_project_sop_eop():
     print(">>>project sop/eop ", sql.get_project_sop_eop(test_project_1))
     print(">>>project sop/eop ", sql.get_project_sop_eop(test_project_fake))
@@ -223,15 +224,6 @@ def test_xls_inject_ss_project():
 #     xls_inject.xls_inject_sb(*test_project_part_list_tuple_1)
 
 
-def test_generate_nl():
-    word.generate_nl(*test_project_vendor_parts_tuple_1)
-
-
-def test_assemble_nl_info():
-    print(">>> nl info: ",
-          sql.assemble_nl_info(*test_project_vendor_parts_tuple_1))
-
-
 def test_get_part_volume_weekly():
     print(">>> weekly volume: ",
           sql.get_part_volume_weekly(*test_project_part_vendor_tuple))
@@ -250,6 +242,16 @@ def test_get_nl_invest_info():
         print(">>> invest info ")
         print(">>> part info", row['part'], ' ', row['invest_name'], ' ', row['cost'])
 
+
 def test_get_project_vendor_qs_yearly():
     print(">>> yearly qs: ", sql.get_project_vendor_qs_yearly(*project_vendor_tuple1))
     print(">>> yearly qs: ", sql.get_project_vendor_qs_yearly(*project_vendor_tuple2))
+
+
+def test_assemble_nl_info():
+    print(">>> nl info: ",
+          sql.assemble_nl_info(*test_project_vendor_parts_tuple_1))
+
+
+def test_generate_nl():
+    word.generate_nl(*test_project_vendor_parts_tuple_1)
