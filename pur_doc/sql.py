@@ -187,10 +187,12 @@ def get_part_volume_yearly(project, part):
 
     if rows:
         for row in rows:
-            year = row['year']
-            vol = row['vol']
-            part_vol_dict[year] = vol
+            if isinstance(row['vol'], int) or isinstance(row['vol'], float):
+                year = row['year']
+                vol = row['vol'] 
+                part_vol_dict[year] = vol
 
+    print(part_vol_dict)
     return part_vol_dict
 
 
