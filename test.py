@@ -255,3 +255,24 @@ def test_assemble_nl_info():
 
 def test_generate_nl():
     word.generate_nl(*test_project_vendor_parts_tuple_1)
+
+
+def test_get_all_project_vendor_tuple():
+    print(">>> all project/vendor tuple: ",
+          sql.get_all_project_vendor_tuple())
+
+
+def test_all_project_vendor_parts_tuple_for_nl_info():
+    for (project, vendor) in sql.get_all_project_vendor_tuple():
+        part_list = sql.get_part_list_by_project_vendor(project, vendor)
+        print(">>> nl info: ",
+              sql.assemble_nl_info(project, vendor, part_list))
+
+
+def test_all_project_vendor_parts_tuple_for_nl_generation():
+    for (project, vendor) in sql.get_all_project_vendor_tuple():
+        part_list = sql.get_part_list_by_project_vendor(project, vendor)
+        print(">>> project: ", project)
+        print(">>> vendor: ", vendor)
+        print(">>> part_list: ", part_list)
+        word.generate_nl(project, vendor, part_list)

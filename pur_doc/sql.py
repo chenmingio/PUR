@@ -55,8 +55,10 @@ def assemble_nl_info(project, vendor, part_list):
     rc['plant_name'] = project_dict['plant_name']
 
     # vendor general info
-    vendor_dict = get_vendor_info(vendor)
-    rc['vendor'] = vendor_dict or defaultdict(constant_factory)
+    vendor_dict = get_vendor_info(vendor) or defaultdict(constant_factory)
+    rc['vendor'] = vendor_dict
+    # quick reference: vendor_name
+    rc['vendor_name'] = vendor_dict['vendor_name']
 
     # tool
     tools = get_nl_tool_info(project, vendor, part_list)
@@ -66,8 +68,6 @@ def assemble_nl_info(project, vendor, part_list):
     invest = get_nl_invest_info(project, vendor, part_list)
     rc['invest'] = invest or defaultdict(constant_factory)
 
-    # quick reference: vendor_name
-    rc['vendor_name'] = vendor_dict['vendor_name']
 
     # project QS info
     rc['qs'] = get_project_vendor_qs_yearly(project, vendor)
@@ -99,8 +99,6 @@ def assemble_nl_info(project, vendor, part_list):
         # finish the individual part dict and append to part list
         rc['parts'].append(part_dict)
 
-    print(">>> nl dict output ")
-    pprint(rc)
 
     return rc
 
@@ -639,7 +637,7 @@ def get_part_list_by_project(project):
 def get_part_list_by_project_vendor(project, vendor):
     """function for nl_generate in route module"""
 
-    cursor = CONN_.cursor()
+    cursor = CONN_f.cursor()
     context = (project, vendor)
 
     cursor.execute(
@@ -674,3 +672,16 @@ def get_all_project_list():
     project_list = [row[0] for row in rows]
 
     return project_list
+
+def get_all_project_vendor_tuple():
+    """get (project, vendor) tuple for nl test """
+
+    cursor = CONN_f.cursor()
+    cursor.execute(
+        """SELECT DISTINCT project, vendor FROM nomi_part"""
+    )
+
+    rows = cursor.fetchall()
+    return [(row['project'], row['vendor']) for row in rows]
+
+
