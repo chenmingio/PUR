@@ -185,4 +185,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# python
+*.pyc
+
 # End of https://www.gitignore.io/api/vim,macos,python,windows
