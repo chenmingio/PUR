@@ -134,30 +134,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-### Vim ###
-# Swap
-[._]*.s[a-v][a-z]
-[._]*.sw[a-p]
-[._]s[a-rt-v][a-z]
-[._]ss[a-gi-z]
-[._]sw[a-p]
-
-# Session
-Session.vim
-Sessionx.vim
-
-# Temporary
-.netrwhist
-*~
-
-# Auto-generated tag files
-tags
-
-# Persistent undo
-[._]*.un~
-
-# Coc configuration directory
-.vim
 
 ### Windows ###
 # Windows thumbnail cache files
@@ -187,5 +163,11 @@ $RECYCLE.BIN/
 
 # python
 *.pyc
+
+# Personal
+# downloads folder
+/app/downloads
+/.pytest_cache
+/.benchmarks
 
 # End of https://www.gitignore.io/api/vim,macos,python,windows

@@ -1,4 +1,4 @@
-from pur_doc import app
+from app.views.routes import app
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8080, debug=True, reloader=True)
+    app.run(host='localhost', port=8080, debug=True)
