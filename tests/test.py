@@ -5,7 +5,7 @@ from openpyxl import load_workbook
 import os
 from config import TEMPLATE_FOLDER
 from app.views import xlsx_inject, docx_inject
-from app.models import sql_query, csv_builder
+from app.models import sql_query, csv_builder, sql_quick_search
 from app.models import load_excel, assemble_dict
 
 # test projects
@@ -62,12 +62,12 @@ def test_show_cwd():
 
 
 def test_get_project_info():
-    assert sql_query.get_project_info(test_project_1)['project'] == test_project_1
-    assert sql_query.get_project_info(test_project_blank) is None
-    assert sql_query.get_project_info(test_project_fake) is None
-    assert sql_query.get_project_info(test_project_none) is None
-    print(sql_query.get_project_info(test_project_1).keys())
-    print("sop date: ", sql_query.get_project_info(test_project_1)['sop'])
+    assert sql_query.get_project_data_and_info(test_project_1)['project'] == test_project_1
+    assert sql_query.get_project_data_and_info(test_project_blank) is None
+    assert sql_query.get_project_data_and_info(test_project_fake) is None
+    assert sql_query.get_project_data_and_info(test_project_none) is None
+    print(sql_query.get_project_data_and_info(test_project_1).keys())
+    print("sop date: ", sql_query.get_project_data_and_info(test_project_1)['sop'])
 
 
 def test_get_part_list_by_project():
@@ -298,7 +298,7 @@ def test_load_excel():
 
 
 def test_get_project_info_dict():
-    rc = sql_query.get_project_info_dict(test_project_2)
+    rc = sql_query.project_info_get(test_project_2)
     print(">>> project dict", rc)
 
 
@@ -312,3 +312,28 @@ def test_build_csv():
 
 def test_generate_ss_folder():
     xlsx_inject.xls_inject_ss_project(test_project_2)
+
+
+def test_wild_search_project_id():
+    rc = sql_quick_search.wild_search_project_by_name(test_project_fake)
+    pprint(f"[test_wild_search_project]: name=GM rc={rc}")
+
+
+def test_wild_search_vendor_id():
+    rc = sql_quick_search.wild_search_vendor_by_name("Hongrita")
+    pprint(f"[test_wild_search_project]: name=HRT rc={rc}")
+
+
+def test_search_project_full_info_by_project():
+    rc = sql_quick_search.search_project_full_info_by_project(test_project_fake)
+    print(f"[search_project_full_info_by_project]: name={test_project_1} rc={rc}")
+
+
+def test_search_vendor_full_info_by_vendor():
+    rc = sql_quick_search.search_vendor_full_info_by_vendor(test_vendor_2)
+    print(f"[search_project_full_info_by_project]: name={test_project_2} rc={rc}")
+
+def test_search_part_full_info_by_part_only():
+    part = "191.674-01"
+    rc = sql_quick_search.search_part_info_by_part(part)
+    print(f"[search_project_full_info_by_part]: part={part} rc={rc}")

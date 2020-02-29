@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pprint import pprint
 
-from app.models.sql_query import constant_factory, get_project_info, get_project_sop_eop, get_vendor_info, \
+from app.models.sql_query import constant_factory, get_project_data_and_info, get_project_sop_eop, get_vendor_info, \
     get_nl_tool_info, get_nl_invest_info, get_project_vendor_qs_yearly, get_part_general_info, get_part_volume_yearly, \
     get_part_volume_weekly, get_part_price_yearly
 
@@ -23,7 +23,7 @@ def assemble_nl_info(project, vendor, part_list):
     rc = defaultdict(constant_factory)
 
     # project general info
-    project_dict = get_project_info(project)
+    project_dict = get_project_data_and_info(project)
     if project_dict is None:
         project_dict = defaultdict(constant_factory)
     rc['project'] = project_dict

@@ -21,7 +21,7 @@ def xls_inject_risk_eval(project, part_list):
     sheet = wb[template_sheet_name]
 
     # inject project information
-    project_info = sql_query.get_project_info(project)
+    project_info = sql_query.get_project_data_and_info(project)
     if project_info:
         sheet['E1'] = project_info['project_name']
 
@@ -107,7 +107,7 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
         sheet['O7'] = vendor_info['vendor_name']
 
     # project info
-    project_info = sql_query.get_project_info(project)
+    project_info = sql_query.get_project_data_and_info(project)
     if project_info:
         sheet['I9'] = project_info['project']
         sheet['D9'] = project_info['project_name']
@@ -241,7 +241,7 @@ def xls_inject_ss_single(project, part, wb):
         sheet['O56'] = part_general_info['sqe']
 
     # project info
-    project_info = sql_query.get_project_info(project)
+    project_info = sql_query.get_project_data_and_info(project)
     if project_info:
         sheet['K6'] = project_info['project']
         sheet['E6'] = project_info['project_name']
@@ -312,7 +312,7 @@ def xls_inject_sb(project, part_list):
     # start the injection
 
     # project information
-    project_info = sql_query.get_project_info(project)
+    project_info = sql_query.get_project_data_and_info(project)
     sheet['H3'] = project
     if project_info:
         sheet['H4'] = project_info['project_name']

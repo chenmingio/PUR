@@ -9,7 +9,6 @@ import config
 CONN = sqlite3.connect(config.SQLITE_DATABASE_URI, check_same_thread=False)
 CONN_f = sqlite3.connect(config.SQLITE_DATABASE_URI, check_same_thread=False)
 
-# CONN_f.row_factory = dict_factory
 CONN_f.row_factory = sqlite3.Row
 
 # Remind word for missing info
@@ -263,7 +262,7 @@ def get_vendor_info(vendor):
         return None
 
 
-def get_project_info(project):
+def get_project_data_and_info(project):
     """from TABLE: project_data + project_info"""
     cursor = CONN_f.cursor()
     context = (project,)
@@ -664,7 +663,7 @@ def create_part_info_table():
     CONN_f.commit()
 
 
-def save_project_info(project_multidict):
+def project_info_save_or_update(project_multidict):
     """save project info into Project INFO table"""
 
     # TODO: check project id is not null and legit
@@ -737,7 +736,7 @@ def save_project_info(project_multidict):
     return 1
 
 
-def delete_project_info(project):
+def project_info_delete(project):
     """delete project info/project volume/part info related to certain project"""
 
     cursor = CONN_f.cursor()
@@ -751,7 +750,7 @@ def delete_project_info(project):
     return f"project: {project} deleted"
 
 
-def get_project_info_dict(project):
+def project_info_get(project):
     """get project info for project_info pages"""
 
     print("[get project-info]: ", project)
