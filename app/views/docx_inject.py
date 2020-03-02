@@ -11,7 +11,13 @@ def generate_nl(project, vendor, part_list):
     pprint(f"[generate nl] inject data: {inject_data}")
 
     filename = f"Nomination_Letter_{project}_{vendor}.docx"
-    template_path = os.path.join(TEMPLATE_FOLDER, 'nl.docx')
+
+    # check if it's pcb
+    material_group_list = [part['general']['mtl_group'] for part in inject_data['parts']]
+    if material_group_list[0] == 'PCB':
+        template_path = os.path.join(TEMPLATE_FOLDER, 'nl_pcb.docx')
+    else:
+        template_path = os.path.join(TEMPLATE_FOLDER, 'nl.docx')
     output_path = os.path.join(DOWNLOAD_FOLDER, filename)
 
     doc = DocxTemplate(template_path)
