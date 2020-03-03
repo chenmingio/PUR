@@ -167,7 +167,9 @@ $RECYCLE.BIN/
 # Personal
 # downloads folder
 /app/downloads
-/.pytest_cache
-/.benchmarks
+/app/uploads
+/data
+/tests/.benchmarks
+/tests/.pytest_cache
 
 # End of https://www.gitignore.io/api/vim,macos,python,windows
