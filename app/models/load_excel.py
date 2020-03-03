@@ -17,6 +17,7 @@ def load_excel(filepath):
                 df = pd.read_excel(xls, sheet)
                 # export to sql
                 df.to_sql(sheet, con=CONN, if_exists='replace', index=False)
+                print("[upload file] success: ", filepath, sheet)
 
 # TODO: limited the allowed filename and sheet names
 # TODO: pandas change date to timestamp. I don't need time. Find a way to cast into date format when load.

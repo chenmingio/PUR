@@ -18,7 +18,7 @@ UPLOAD_FILE_LIST = [
     '03_Hella_Contact',
     '04_Hella_Plant',
     '05_FY_Ex_Rate',
-    '10_Vendor_Contact'
+    '10_Vendor_Contact',
     '11_Contract_Status',
     '12_Vendor_Rating',
     '13_Vendor_Production',

@@ -25,14 +25,17 @@ def upload_file():
         file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
+        print("[upload file]: ", file.filename.split('.')[0])
         if file.filename == '':
             return 'No selected file'
-        if file and (file.filename in UPLOAD_FILE_LIST):
+        if file and (file.filename.split('.')[0] in UPLOAD_FILE_LIST):
             filename = secure_filename(file.filename)
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
             load_excel.load_excel(file_path)
             return f'file upload success: {filename}'
+        else:
+            return f'file {secure_filename(file.filename)} not allowed to upload.'
 
 
 # Sourcing Document helper
