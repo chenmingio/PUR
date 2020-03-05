@@ -43,7 +43,7 @@ def assemble_nl_info(project, vendor, part_list):
     vendor_dict = get_vendor_info(vendor) or defaultdict(constant_factory)
     rc['vendor'] = vendor_dict
     # quick reference: vendor_name
-    rc['vendor_name'] = vendor_dict['vendor_name']
+    rc['vendor_name'] = vendor_dict['duns_name'] # change to duns name!
 
     # tool
     tools = get_nl_tool_info(project, vendor, part_list)

@@ -7,7 +7,7 @@ CONN = sqlite3.connect(SQLITE_DATABASE_URI, check_same_thread=False)
 
 
 def load_excel(filepath):
-
+    print("----debug: into load_excel: ", filepath)
     # read the excel file to dataframe
     with pd.ExcelFile(filepath) as xls:
         # loop through each sheet

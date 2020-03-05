@@ -29,9 +29,9 @@ def wild_search_vendor_by_name(keyword):
     cursor = conn.cursor()
     sql_keyword = f'%{keyword}%'
     context = (sql_keyword,)
-    cursor.execute("""SELECT DISTINCT vendor_name, vendor FROM vendor_contact WHERE vendor_name LIKE ?""", context)
+    cursor.execute("""SELECT DISTINCT vendor, duns_name FROM duns WHERE duns_name LIKE ? ORDER BY vendor""", context)
     rows = cursor.fetchall()
-    table_fields = ['Vendor Name', 'Vendor ID']
+    table_fields = ['Vendor ID', 'Vendor Name']
     table_rows = [row for row in rows]
     return dict(fields=table_fields, rows=table_rows)
 

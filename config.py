@@ -18,6 +18,7 @@ UPLOAD_FILE_LIST = [
     '03_Hella_Contact',
     '04_Hella_Plant',
     '05_FY_Ex_Rate',
+    '06_DUNS',
     '10_Vendor_Contact',
     '11_Contract_Status',
     '12_Vendor_Rating',
@@ -35,6 +36,7 @@ UPLOAD_SHEET_LIST = [
     'hella_person',
     'plant',
     'ex_rate',
+    'duns',
 
     # 10: vendor info
     'vendor_contact',
@@ -49,7 +51,6 @@ UPLOAD_SHEET_LIST = [
     'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest',
 
     # future DW sheets
-    'duns',
     'ppm',
     'forecast',
 

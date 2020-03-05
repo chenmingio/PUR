@@ -48,7 +48,6 @@ test_project_vendor_parts_tuple_2 = ("1361P.000054", "49100612",
 test_project_vendor_parts_tuple_3 = ("1111E.001236", "48201484",
                                      ["234.536-00", "323.140-00"])
 
-
 test_project_vendor_parts_tuple_4 = ("1111E.001152", "48200053",
                                      ["201.541-00", "201.542-00"])
 
@@ -273,7 +272,7 @@ def test_assemble_nl_info():
 
 
 def test_generate_nl():
-    docx_inject.generate_nl(*test_project_vendor_parts_tuple_4)
+    docx_inject.generate_nl(*test_project_vendor_parts_tuple_1)
 
 
 def test_get_all_project_vendor_tuple():
@@ -299,6 +298,10 @@ def test_all_project_vendor_parts_tuple_for_nl_generation():
 
 def test_load_excel():
     load_excel.load_excel("03_project.xlsx")
+
+
+def test_load_excel_duns():
+    load_excel.load_excel("06_DUNS.xlsx")
 
 
 def test_get_project_info_dict():
@@ -336,6 +339,7 @@ def test_search_project_full_info_by_project():
 def test_search_vendor_full_info_by_vendor():
     rc = sql_quick_search.search_vendor_full_info_by_vendor(test_vendor_2)
     print(f"[search_project_full_info_by_project]: name={test_project_2} rc={rc}")
+
 
 def test_search_part_full_info_by_part_only():
     part = "191.674-01"

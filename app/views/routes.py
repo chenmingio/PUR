@@ -67,10 +67,11 @@ def return_sourcing_document():
     part_list = request_dict.getlist("part_list[]")
 
     output_filename = file_builder.build_file(filename, project, vendor, part_list)
-    print("[send_file] file ready to send: ", output_filename)
 
     if output_filename:
         return jsonify(output_filename)
+    else:
+        return jsonify("generate file failed")
 
 
 # Project Info Page
@@ -109,11 +110,7 @@ def project_report_get(report_name):
 @app.route('/downloads/<path:filename>')
 def download_file(filename):
     """special route for file download as attachment"""
-    # maybe this works on my SUSE server...not in mac anyway
-    # @after_this_request
-    # def remove_file(response):
-    #     os.remove(os.path.join(DOWNLOAD_FOLDER, filename))
-    return send_from_directory("./downloads", filename, as_attachment=True)
+    return send_from_directory("./downloads", filename, as_attachment=True, cache_timeout=-1)
 
 
 # Quick Search
@@ -122,20 +119,15 @@ def quick_search_project():
     category = request.args.get("category")
     keyword = request.args.get("keyword")
 
-    if category == 'Project ID':
-        rc = sql_quick_search.search_project_full_info_by_project(keyword)
-        return jsonify(rc)
-    elif category == 'Vendor ID':
-        rc = sql_quick_search.search_vendor_full_info_by_vendor(keyword)
-        return jsonify(rc)
-    elif category == 'Project Name':
-        return jsonify(sql_quick_search.wild_search_project_by_name(keyword))
-    elif category == 'Vendor Name':
-        rc = sql_quick_search.wild_search_vendor_by_name(keyword)
-        return jsonify(rc)
-    elif category == 'Part Number':
-        rc = sql_quick_search.search_part_info_by_part(keyword)
-        return jsonify(rc)
+    if category == 'Project':
+        if '.' in keyword:
+            return jsonify(sql_quick_search.search_project_full_info_by_project(keyword))
+        else:
+            return jsonify(sql_quick_search.wild_search_project_by_name(keyword))
+    elif category == 'Vendor':
+        if keyword.isdigit():
+            return jsonify(sql_quick_search.search_vendor_full_info_by_vendor(keyword))
+        else:
+            return jsonify(sql_quick_search.wild_search_vendor_by_name(keyword))
     else:
-        # TODO consider rc is None case
         return jsonify({'fields': ["Result Not Found"], 'rows': []})

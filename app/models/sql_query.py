@@ -14,6 +14,7 @@ CONN_f.row_factory = sqlite3.Row
 # Remind word for missing info
 REMIND_WORD = 'None'
 DEFAULT_WPY = 50
+CAPACITY_BUFF = 1.3
 
 
 def constant_factory():
@@ -50,7 +51,7 @@ def get_vendor_weeks_per_year(vendor):
 
 
 def get_part_volume_weekly(project, part, vendor):
-    """get part volume devided by weeks_per_year of vendor and mulitiply 1.3"""
+    """get part volume divided by weeks_per_year of vendor and multiply 1.3"""
 
     wpy = get_vendor_weeks_per_year(vendor)
 
@@ -58,9 +59,10 @@ def get_part_volume_weekly(project, part, vendor):
         wpy = DEFAULT_WPY
 
     temp_dict = get_part_volume_yearly(project, part)
-    for vol in temp_dict:
-        vol = vol / wpy
-
+    print("----debug: temp_dict before is: ", temp_dict)
+    for key, vol in temp_dict.items():
+        temp_dict[key] = vol / wpy * CAPACITY_BUFF
+    print("----debug: temp_dict after is: ", temp_dict)
     return temp_dict
 
 
@@ -252,6 +254,7 @@ def get_vendor_info(vendor):
     LEFT JOIN contract AS C ON VC.vendor=C.vendor
     LEFT JOIN quality AS Q ON VC.vendor=Q.vendor
     LEFT JOIN vendor_production AS P on VC.vendor=P.vendor
+    LEFT JOIN duns AS D on VC.vendor=D.vendor
     WHERE VC.vendor=?""", context)
 
     row = cursor.fetchone()

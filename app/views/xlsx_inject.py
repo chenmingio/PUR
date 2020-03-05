@@ -28,6 +28,7 @@ def xls_inject_risk_eval(project, part_list):
     # inject part information part by part
     n = 0
     for part in part_list:
+        print("----debug---xls_inject--- inject part: ", part)
         context = (project, part)
         column = (6 + 2 * n)
 
@@ -82,7 +83,11 @@ def xls_inject_risk_eval(project, part_list):
     # save the inject
     output_filename = f"Risk_Evaluation_{project}.xlsx"
     output_file_path = os.path.join(DOWNLOAD_FOLDER, output_filename)
+    # remove file is already exists
+    if os.path.exists(output_file_path):
+        os.remove(output_file_path)
     wb.save(output_file_path)
+    print("------debug------ file saved to downloads: ", output_file_path)
     return output_filename
 
 
@@ -139,18 +144,14 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     return output_file_path
 
 
-def xls_inject_cbd_project(project):
+def xls_inject_cbd_project(project, part_list):
     """downloads CBD in zip file"""
-
     # file prep
     template_name = 'cbd.xlsx'
     template_path = os.path.join(TEMPLATE_FOLDER, template_name)
 
     # load workbook into openpyxl
     wb = load_workbook(template_path)
-
-    # prepare part list
-    part_list = sql_query.get_part_list_by_project(project)
 
     # helper prep
     output_path_list = []
@@ -178,7 +179,7 @@ def xls_inject_cbd_project(project):
     return output_zip_name
 
 
-def xls_inject_ss_project(project):
+def xls_inject_ss_project(project, part_list):
     """downloads supplier selection in zip file"""
 
     # file prep (name and template loading)
@@ -187,9 +188,6 @@ def xls_inject_ss_project(project):
 
     # load workbook into openpyxl
     wb = load_workbook(file_path)
-
-    # prepare part list
-    part_list = sql_query.get_part_list_by_project(project)
 
     # helper list
     output_path_list = []
