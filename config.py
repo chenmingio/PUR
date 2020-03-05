@@ -55,6 +55,8 @@ UPLOAD_SHEET_LIST = [
     'forecast',
 
     # templates
+    'nl',
+    'nl_pcb'
 ]
 
 ALLOWED_EXTENSIONS = {'xlsx', 'docx'}
