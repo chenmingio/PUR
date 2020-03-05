@@ -51,6 +51,8 @@ test_project_vendor_parts_tuple_3 = ("1111E.001236", "48201484",
 test_project_vendor_parts_tuple_4 = ("1111E.001152", "48200053",
                                      ["201.541-00", "201.542-00"])
 
+test_project_vendor_parts_tuple_5 = ("1111E.001236", "48201484",
+                                     ["234.536-00", "323.140-00"])
 # test project/part/vendor tuple
 test_project_part_vendor_tuple = ("1111E.001169", "935.085-00", "48200041")
 
@@ -272,7 +274,7 @@ def test_assemble_nl_info():
 
 
 def test_generate_nl():
-    docx_inject.generate_nl(*test_project_vendor_parts_tuple_1)
+    docx_inject.generate_nl(*test_project_vendor_parts_tuple_5)
 
 
 def test_get_all_project_vendor_tuple():

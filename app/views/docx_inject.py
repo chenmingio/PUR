@@ -8,13 +8,13 @@ from config import TEMPLATE_FOLDER, DOWNLOAD_FOLDER
 
 def generate_nl(project, vendor, part_list):
     inject_data = assemble_nl_info(project, vendor, part_list)
-    pprint(f"[generate nl] inject data: {inject_data}")
+    # pprint(f"[generate nl] inject data: {inject_data}")
 
     filename = f"Nomination_Letter_{project}_{vendor}.docx"
 
     # check if it's pcb
     material_group_list = [part['general']['mtl_group'] for part in inject_data['parts']]
-    if material_group_list[0] == 'PCB':
+    if material_group_list and material_group_list[0] == 'PCB':
         template_path = os.path.join(TEMPLATE_FOLDER, 'nl_pcb.docx')
     else:
         template_path = os.path.join(TEMPLATE_FOLDER, 'nl.docx')
