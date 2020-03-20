@@ -1,4 +1,5 @@
-from app.models import sql_query, csv_builder, load_excel, sql_quick_search
+import app.models.sql_project_info_extra
+from app.models import sql_NRM, csv_builder, load_excel, sql_quick_search, sql_logistics, logisitcs
 from app.views import file_builder
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -41,19 +42,19 @@ def upload_file():
 # Sourcing Document helper
 @app.route('/project/<project>/vendors')
 def return_vendors_by_project(project):
-    vendors = sql_query.get_vendor_list_by_project(project)
+    vendors = sql_NRM.get_vendor_list_by_project(project)
     return jsonify(vendors)
 
 
 @app.route('/project/<project>/vendor/<vendor>/parts')
 def return_parts_by_project_vendor(project, vendor):
-    parts = sql_query.get_part_list_by_project_vendor(project, vendor)
+    parts = sql_NRM.get_part_list_by_project_vendor(project, vendor)
     return jsonify(parts)
 
 
 @app.route('/project/<project>/parts')
 def return_parts_by_project(project):
-    parts = sql_query.get_part_list_by_project(project)
+    parts = sql_NRM.get_part_list_by_project(project)
     return jsonify(parts)
 
 
@@ -77,22 +78,22 @@ def return_sourcing_document():
 # Project Info Page
 @app.route('/project/new/info', methods=['POST'])
 def project_info_save_or_update():
-    result = sql_query.project_info_save_or_update(request.args)
+    result = app.models.sql_project_info_extra.project_info_save_or_update(request.args)
     print("[save project_info] ", result)
     return {"result": result}
 
 
 @app.route('/project/<project>/info', methods=['delete'])
 def project_info_delete(project):
-    result = sql_query.project_info_delete(project)
+    result = app.models.sql_project_info_extra.project_info_delete(project)
     print("[delete project_info] ", result)
     return {"result": result}
 
 
 @app.route('/project/<project>/info', methods=['GET'])
 def project_info_get(project):
-    print("[get project_info] dict find: ", sql_query.project_info_get(project))
-    return sql_query.project_info_get(project)
+    print("[get project_info] dict find: ", app.models.sql_project_info_extra.project_info_get(project))
+    return app.models.sql_project_info_extra.project_info_get(project)
 
 
 # Project Report Page #TODO rethink the logic and update function
@@ -131,3 +132,37 @@ def quick_search_project():
             return jsonify(sql_quick_search.wild_search_vendor_by_name(keyword))
     else:
         return jsonify({'fields': ["Result Not Found"], 'rows': []})
+
+
+# Tool Database
+@app.route('/logistics/part/<part>/vendors')
+def tool_database_get_vendors(part):
+    if part and len(part) > 9:
+        vendors = sql_logistics.get_vendor_list_from_weekly_demand(part)
+        return jsonify(vendors)
+    else:
+        return jsonify(['wrong format'])
+
+
+# Tool Database
+@app.route('/logistics/part/<part>/vendor/<vendor>/tools')
+def tool_database_get_tools(part, vendor):
+    if part and vendor and len(part) > 9 and len(vendor) > 7:
+        rc = sql_logistics.get_tool_list_by_part_and_vendor(part, vendor)
+        return jsonify(rc)
+    else:
+        return jsonify(['wrong format'])
+
+
+# Tool Database: return NRM based on part
+@app.route('/logistics/part/<part>/nrm_info')
+def get_nrm_part_info(part):
+    target_part = logisitcs.Part(part, 1111)
+    return jsonify(target_part.get_project_dict_list_from_nrm())
+
+
+# Return capacity and SA for chart render
+@app.route('/logistics/part/<part>/vendor/<vendor>/capacity')
+def get_part_vendor_capacity_sa(part, vendor):
+    target_part = logisitcs.Part(part, 1111)
+    return jsonify(target_part.get_delivery(vendor))

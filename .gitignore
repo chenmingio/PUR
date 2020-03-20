@@ -171,5 +171,5 @@ $RECYCLE.BIN/
 /data
 /tests/.benchmarks
 /tests/.pytest_cache
-
+.idea/
 # End of https://www.gitignore.io/api/vim,macos,python,windows

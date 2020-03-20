@@ -18,15 +18,17 @@ UPLOAD_FILE_LIST = [
     '03_Hella_Contact',
     '04_Hella_Plant',
     '05_FY_Ex_Rate',
-    '06_DUNS',
-    '10_Vendor_Contact',
+
     '11_Contract_Status',
     '12_Vendor_Rating',
     '13_Vendor_Production',
     '14_Vendor_Quality',
     '15_Vendor_Team',
-    '20_NR_Collector', ]
 
+    '30_vendor_collector',
+    '31_nomination_roadmap_collector',
+    '32_logistics_collector',
+]
 
 UPLOAD_SHEET_LIST = [
 
@@ -38,28 +40,34 @@ UPLOAD_SHEET_LIST = [
     'ex_rate',
     'duns',
 
-    # 10: vendor info
-    'vendor_contact',
+    # 10:15 vendor info
     'contract',
     'vendor_basic',
     'vendor_team',
     'vendor_production',
     'quality',
 
-    # 20_nr
+    # 30 vendor collector
+    'duns',
+    'vendor_contact',
+
+
+    # 31 nomination roadmap collector
     'project_data', 'part_data', 'project_timing', 'sourcing_concept',
     'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest',
 
+    # 32 logistics collector
+    'tool_database', 'received_quantity', 'weekly_demand',
+
     # future DW sheets
     'ppm',
-    'forecast',
 
     # templates
     'nl',
-    'nl_pcb'
+    'nl_pcb',
 ]
 
-ALLOWED_EXTENSIONS = {'xlsx', 'docx'}
+ALLOWED_EXTENSIONS = ['xlsx', 'docx',]
 
 # Excel Sheet Password
 EXCEL_PASSWORD = '800520'
@@ -67,3 +75,5 @@ EXCEL_PASSWORD = '800520'
 # Business Constants
 EX_RATE = {'EUR': 8.14, 'CNY': 1, 'USD': 6.898}
 LOCAL_SB_THRESHOLD = 250  # temporary reduced
+DEFAULT_WPY = 50
+CAPACITY_BUFF = 1.3
