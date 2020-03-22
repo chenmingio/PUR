@@ -34,6 +34,7 @@ def get_project_sop_eop(project):
 
 
 def get_vendor_weeks_per_year(vendor):
+    """get wpy (week per year) from db. If missing, default to DEFAULT_WPY"""
     cursor = CONN_f.cursor()
     context = (vendor,)
 
@@ -43,21 +44,22 @@ def get_vendor_weeks_per_year(vendor):
               WHERE VP.vendor=?""", context)
 
     row = cursor.fetchone()
-    wpy = row['wpy']
-    if wpy is None or wpy.isdigit() is False:
-        wpy = DEFAULT_WPY
-    return wpy
+    if row:
+        wpy = row['wpy']
+        if wpy.isdigit() is True:
+            return wpy
+    else:
+        return DEFAULT_WPY
+
 
 def get_part_volume_weekly(project, part, vendor):
-    """get part volume divided by weeks_per_year of vendor and multiply 1.3"""
+    """get part volume divided by weeks_per_year of vendor and multiply by buff"""
 
     wpy = get_vendor_weeks_per_year(vendor)
 
     temp_dict = get_part_volume_yearly(project, part)
-    print("----debug: temp_dict before is: ", temp_dict)
     for key, vol in temp_dict.items():
-        temp_dict[key] = vol / wpy * CAPACITY_BUFF
-    print("----debug: temp_dict after is: ", temp_dict)
+        temp_dict[key] = round(vol / wpy * CAPACITY_BUFF, 0)
     return temp_dict
 
 

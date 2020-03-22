@@ -173,3 +173,7 @@ $RECYCLE.BIN/
 /tests/.pytest_cache
 .idea/
 # End of https://www.gitignore.io/api/vim,macos,python,windows
+
+/bin
+/lib
+include/

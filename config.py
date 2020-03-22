@@ -57,7 +57,7 @@ UPLOAD_SHEET_LIST = [
     'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest',
 
     # 32 logistics collector
-    'tool_database', 'received_quantity', 'weekly_demand',
+    'tool_database', 'received_quantity', 'weekly_demand', 'contract_volume', 'apn_volume', 'tool_capacity',
 
     # future DW sheets
     'ppm',

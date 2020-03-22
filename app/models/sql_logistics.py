@@ -51,49 +51,90 @@ def build_volumes_object_for_nrm_vendor(project, part, vendor):
     return rc
 
 
-def get_weekly_max_capacity_by_date(part, vendor, date):
-    year = (date.year - 1) if date.month < 6 else date.year
-    print("year: ", year)
+def get_nrm_part_volume_by_vendor_and_year(part, vendor, year):
     cursor = conn.cursor()
     context = (part, vendor, year)
-    cursor.execute("""SELECT SUM(volume * quota /100) AS year_volume 
-            FROM nomi_part AS NP LEFT JOIN rfq_part AS RP USING (project, part, year) 
-            WHERE volume>0 AND quota>0 AND part=? AND vendor=? AND year=?""", context)
+    cursor.execute("""SELECT SUM(volume * quota /100)/1000 AS year_volume 
+                FROM nomi_part AS NP LEFT JOIN rfq_part AS RP USING (project, part, year) 
+                WHERE volume>0 AND quota>0 AND part=? AND vendor=? AND year=?""", context)
     row = cursor.fetchone()
-    year_volume = row[0]
-    wpy = get_vendor_weeks_per_year(vendor)
-    if year_volume:
-        print(f">>>[debug]: year vol: {year_volume}, wpy: {wpy}")
-        return year_volume / wpy * 1.3
+    return row[0] if row else None
+
+
+def get_nl_part_volume_by_vendor_and_year(part, vendor, year):
+    cursor = conn.cursor()
+    context = (part, vendor, year)
+    cursor.execute("""SELECT SUM(volume)/1000 as year_volume
+    FROM contract_volume WHERE part=? AND vendor=? AND year=?""", context)
+    row = cursor.fetchone()
+    return row[0] if row else None
+
+
+def get_apn_part_volume_by_vendor_and_year(part, vendor, year):
+    cursor = conn.cursor()
+    context = (part, vendor, year)
+    cursor.execute("""SELECT SUM(capacity)/1000 as year_volume
+    FROM apn_volume WHERE capacity>0 AND part=? AND vendor=? AND year=?""", context)
+    row = cursor.fetchone()
+    return row[0] if row else None
+
+
+def get_tool_capacity_by_vendor(part, vendor, year):
+    cursor = conn.cursor()
+    context = (part, vendor)
+    cursor.execute("""SELECT capacity/1000 FROM tool_capacity WHERE part=? AND vendor=?""", context)
+    row = cursor.fetchone()
+    return row[0] if row else None
+
+
+def get_demand(part, vendor):
+    cursor = conn.cursor()
+    context = (part, vendor)
+    cursor.execute("""SELECT DATE(start_of_week) AS date, to_deliver_qty_week/1000 AS qty FROM weekly_demand 
+    WHERE trim(part)=? AND vendor=? ORDER BY DATE""", context)
+    rows = cursor.fetchall()
+    demand = {'date': [row[0] for row in rows], 'qty': [row[1] for row in rows]}
+    return demand
+
+
+def get_fiscal_year(date_obj):
+    return date_obj.year if date_obj.month > 5 else date_obj.year - 1
 
 
 def get_delivery(part, vendor):
-    cursor = conn.cursor()
-    context = (part, vendor)
-    cursor.execute("""SELECT DATE(start_of_week) AS date, to_deliver_qty_week AS qty FROM weekly_demand 
-    WHERE trim(part)=? AND vendor=? ORDER BY DATE""", context)
-    rows = cursor.fetchall()
-    demand = {'date': [row[0] for row in rows], 'qty': [row[1] / 1000 for row in rows]}
-    if rows:
-        capacity_tuples = []
+    demand = get_demand(part, vendor)
+    demand_dates = get_demand(part, vendor)['date']
+    if demand_dates:
 
-        delivery_start = date.fromisoformat(rows[0][0])
-        delivery_end = date.fromisoformat(rows[-1][0])
+        delivery_start = date.fromisoformat(demand_dates[0])
+        delivery_end = date.fromisoformat(demand_dates[-1])
         intervals = [(date(year, 6, 1), date(year + 1, 5, 31)) for year in
                      range(delivery_start.year - 1, delivery_end.year + 1)]
 
-        print(">>> interval is: ", intervals)
-        for date_0, date_1 in intervals:
-            if delivery_start > date_1 or delivery_end < date_0:
-                pass
-            else:
-                capacity_start = max(date_0, delivery_start)
-                capacity_end = min(date_1, delivery_end)
-                _capacity = get_weekly_max_capacity_by_date(part, vendor, capacity_start)
-                weekly_capacity = _capacity / 1000 if _capacity else []
-                capacity_tuples.append(
-                    {'interval': {'begin': capacity_start.isoformat()[:11], 'end': capacity_end.isoformat()[:11]},
-                     'capacity': weekly_capacity})
-                # TODO python dict is slow hmmm? use list as api and parse back to object in front end?
+        capacities = dict()
 
-        return {'demand': demand, 'capacities': capacity_tuples}
+        for capacity_function, key in zip(
+                [get_nl_part_volume_by_vendor_and_year, get_apn_part_volume_by_vendor_and_year,
+                 get_tool_capacity_by_vendor], ["nl", "apn", "tool"]):
+
+            # each nl/apn/tool value is a list of capacity object, like [{'interval': xxx, 'capacity': number}...]
+            capacities[key] = []
+            for date_0, date_1 in intervals:
+                if delivery_start > date_1 or delivery_end < date_0:
+                    pass
+                else:
+                    capacity_start = max(date_0, delivery_start)
+                    capacity_end = min(date_1, delivery_end)
+
+                    year_volume = capacity_function(part, vendor, get_fiscal_year(capacity_start))
+                    if key == "tool":
+                        week_capacity = get_vendor_weeks_per_year(vendor)
+                    else:
+                        week_capacity = year_volume / get_vendor_weeks_per_year(vendor) if year_volume else None
+
+                    capacities[key].append(
+                        {'interval': {'begin': capacity_start.isoformat()[:11], 'end': capacity_end.isoformat()[:11]},
+                         'capacity': week_capacity})
+                # TODO python dict is slow? use list as api and parse back to object in front end?
+
+        return {'demand': demand, 'capacities': capacities}

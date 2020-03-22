@@ -15,18 +15,15 @@ app.secret_key = SECRET_KEY
 CORS(app)
 
 
-# All with API communication
 # upload excel
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
             return "'No file part'"
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        print("[upload file]: ", file.filename.split('.')[0])
+        # if user does not select file, browser also submit an empty part without filename
         if file.filename == '':
             return 'No selected file'
         if file and (file.filename.split('.')[0] in UPLOAD_FILE_LIST):
@@ -38,8 +35,19 @@ def upload_file():
         else:
             return f'file {secure_filename(file.filename)} not allowed to upload.'
 
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''
 
-# Sourcing Document helper
+
+# All with API communication
+# Sourcing Document helper: provide vendor options for project
 @app.route('/project/<project>/vendors')
 def return_vendors_by_project(project):
     vendors = sql_NRM.get_vendor_list_by_project(project)
