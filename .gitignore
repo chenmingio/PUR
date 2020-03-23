@@ -170,4 +170,4 @@ $RECYCLE.BIN/
 include/
 
 # database
-local nr.db
+/data/nr.db
