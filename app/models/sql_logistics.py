@@ -2,7 +2,7 @@
 from datetime import date
 import sqlite3
 from config import CAPACITY_BUFF, SQLITE_DATABASE_URI
-from app.models.sql_NRM import get_vendor_weeks_per_year
+from app.models.sql_nrm import get_vendor_weeks_per_year
 
 conn = sqlite3.connect(SQLITE_DATABASE_URI, check_same_thread=False)
 

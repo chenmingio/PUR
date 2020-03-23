@@ -3,7 +3,7 @@ import os
 from openpyxl import load_workbook
 
 import config
-from app.models import sql_NRM
+from app.models import sql_nrm
 from config import DOWNLOAD_FOLDER, TEMPLATE_FOLDER
 
 CBD_SHEET_PASSWORD = config.EXCEL_PASSWORD
@@ -21,7 +21,7 @@ def xls_inject_risk_eval(project, part_list):
     sheet = wb[template_sheet_name]
 
     # inject project information
-    project_info = sql_NRM.get_project_data_and_info(project)
+    project_info = sql_nrm.get_project_data_and_info(project)
     if project_info:
         sheet['E1'] = project_info['project_name']
 
@@ -36,7 +36,7 @@ def xls_inject_risk_eval(project, part_list):
             sheet.cell(row=12, column=column).value = project_info['sop'][3:]
 
         # part general info
-        part_general_info = sql_NRM.get_part_general_info(*context)
+        part_general_info = sql_nrm.get_part_general_info(*context)
         if part_general_info:
             sheet.cell(row=4, column=column).value = part_general_info['part']
             sheet.cell(
@@ -55,22 +55,22 @@ def xls_inject_risk_eval(project, part_list):
                        column=column).value = part_general_info['buyer']
 
         # volume_avg
-        vol_avg = sql_NRM.get_part_volume_avg(*context)
+        vol_avg = sql_nrm.get_part_volume_avg(*context)
         if vol_avg:
             sheet.cell(row=7, column=column).value = int(vol_avg)
 
         # target price:
-        target_price = sql_NRM.get_part_target_price_avg_100EUR(*context)
+        target_price = sql_nrm.get_part_target_price_avg_100EUR(*context)
         sheet.cell(row=8,
                    column=column).value = target_price  # Input as None is OK
 
         # lifetime:
-        lifetime = sql_NRM.get_part_lifetime(*context)
+        lifetime = sql_nrm.get_part_lifetime(*context)
         if lifetime:  # avoid lifetime=0
             sheet.cell(row=9, column=column).value = lifetime
 
         # part_timing
-        part_timing = sql_NRM.get_part_timing(*context)
+        part_timing = sql_nrm.get_part_timing(*context)
         if part_timing:
             ppap = part_timing['ppap_date']
             if ppap:
@@ -99,7 +99,7 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     sheet = workbook[sheet_name]
 
     # part general info
-    part_general_info = sql_NRM.get_part_general_info(project, part)
+    part_general_info = sql_nrm.get_part_general_info(project, part)
     if part_general_info:
         sheet['D5'] = part_general_info['part']
         sheet['I5'] = part_general_info['part_description']
@@ -107,12 +107,12 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
 
     # vendor info
     sheet['L7'] = vendor
-    vendor_info = sql_NRM.get_vendor_info(vendor)
+    vendor_info = sql_nrm.get_vendor_info(vendor)
     if vendor_info:
         sheet['O7'] = vendor_info['vendor_name']
 
     # project info
-    project_info = sql_NRM.get_project_data_and_info(project)
+    project_info = sql_nrm.get_project_data_and_info(project)
     if project_info:
         sheet['I9'] = project_info['project']
         sheet['D9'] = project_info['project_name']
@@ -126,7 +126,7 @@ def xls_inject_cbd_single(project, part, vendor, workbook):
     # segment (pass)
 
     # yearly volume
-    volume_dict = sql_NRM.get_part_volume_yearly(project, part)
+    volume_dict = sql_nrm.get_part_volume_yearly(project, part)
     if volume_dict:
         for i, vol in enumerate(volume_dict):
             if i < 11:
@@ -158,7 +158,7 @@ def xls_inject_cbd_project(project, part_list):
 
     for part in part_list:
         # prepare vendor list
-        vendor_list = sql_NRM.get_vendor_selected_list_by_project_and_part(project, part)
+        vendor_list = sql_nrm.get_vendor_selected_list_by_project_and_part(project, part)
 
         for vendor in vendor_list:
             # run the injection and return the file name
@@ -220,7 +220,7 @@ def xls_inject_ss_single(project, part, wb):
     sheet = wb[sheet_name]
 
     # part general info
-    part_general_info = sql_NRM.get_part_general_info(project, part)
+    part_general_info = sql_nrm.get_part_general_info(project, part)
     if part_general_info:
         sheet['E8'] = part_general_info['part']
         sheet['K8'] = part_general_info['part_description']
@@ -239,41 +239,41 @@ def xls_inject_ss_single(project, part, wb):
         sheet['O56'] = part_general_info['sqe']
 
     # project info
-    project_info = sql_NRM.get_project_data_and_info(project)
+    project_info = sql_nrm.get_project_data_and_info(project)
     if project_info:
         sheet['K6'] = project_info['project']
         sheet['E6'] = project_info['project_name']
         sheet['E12'] = project_info['sop']
 
     # lifetime:
-    lifetime = sql_NRM.get_part_lifetime(project, part)
+    lifetime = sql_nrm.get_part_lifetime(project, part)
     if lifetime:  # use if to avoid lifetime=0
         sheet['K12'] = lifetime
 
     # volume_average
-    vol_avg = sql_NRM.get_part_volume_avg(project, part)
+    vol_avg = sql_nrm.get_part_volume_avg(project, part)
     if vol_avg:
         sheet['E14'] = int(vol_avg)
 
     # PVO
-    pvo = sql_NRM.get_part_target_pvo_part(project, part)
+    pvo = sql_nrm.get_part_target_pvo_part(project, part)
     if pvo:
         sheet['K14'] = pvo
 
     # part_timing
-    part_timing = sql_NRM.get_part_timing(project, part)
+    part_timing = sql_nrm.get_part_timing(project, part)
     if part_timing:
         sheet['R25'] = part_timing['nomination_date']
 
     # prepare vendor list
     n = 0  # for the row adding
-    vendor_list = sql_NRM.get_vendor_selected_list_by_project_and_part(project, part)
+    vendor_list = sql_nrm.get_vendor_selected_list_by_project_and_part(project, part)
     for vendor in vendor_list:
 
         # inject vendor ID
         sheet.cell(row=29 + n, column=2).value = vendor
         # inject vendor info
-        vendor_info = sql_NRM.get_vendor_info(vendor)
+        vendor_info = sql_nrm.get_vendor_info(vendor)
         if vendor_info:
             sheet.cell(row=29 + n, column=4).value = vendor_info['vendor_name']
             sheet.cell(row=29 + n, column=7).value = vendor_info['rating']
@@ -310,7 +310,7 @@ def xls_inject_sb(project, part_list):
     # start the injection
 
     # project information
-    project_info = sql_NRM.get_project_data_and_info(project)
+    project_info = sql_nrm.get_project_data_and_info(project)
     sheet['H3'] = project
     if project_info:
         sheet['H4'] = project_info['project_name']
@@ -356,14 +356,14 @@ def xls_inject_sb(project, part_list):
         part_timing_column_num = (6 + 6 * part_info_i)
 
         # part general info
-        part_general_info = sql_NRM.get_part_general_info(project, part)
+        part_general_info = sql_nrm.get_part_general_info(project, part)
         if part_general_info and part_info_i < 4:
             sheet.cell(row=24, column=part_timing_column_num
                        ).value = part_general_info['part']
             sheet.cell(row=25, column=part_timing_column_num
                        ).value = part_general_info['part_description']
         # part_timing
-        part_timing = sql_NRM.get_part_timing(project, part)
+        part_timing = sql_nrm.get_part_timing(project, part)
         if part_timing:
             sheet.cell(row=30, column=part_timing_column_num
                        ).value = part_timing['nomination_date']
@@ -381,7 +381,7 @@ def xls_inject_sb(project, part_list):
         bom_part_row_num = 43 + bom_part_row_i
 
         ## part general info
-        part_general_info = sql_NRM.get_part_general_info(project, part)
+        part_general_info = sql_nrm.get_part_general_info(project, part)
         if part_general_info and bom_part_row_i < 4:
             sheet.cell(row=bom_part_row_num,
                        column=2).value = part_general_info['part']
@@ -390,7 +390,7 @@ def xls_inject_sb(project, part_list):
             sheet.cell(row=bom_part_row_num,
                        column=15).value = part_general_info['currency']
             ## target_PVO
-            target_pvo_total = sql_NRM.get_part_target_pvo_total(project, part)
+            target_pvo_total = sql_nrm.get_part_target_pvo_total(project, part)
             if target_pvo_total:
                 sheet.cell(row=bom_part_row_num,
                            column=15).value = target_pvo_total
@@ -406,20 +406,20 @@ def xls_inject_sb(project, part_list):
         concept_single_part_col_num = 15
 
         ## part general info
-        part_general_info = sql_NRM.get_part_general_info(project, part)
+        part_general_info = sql_nrm.get_part_general_info(project, part)
         if part_general_info and concept_single_part_row_i < 4:
             sheet.cell(row=concept_single_part_row_num,
                        column=15).value = part_general_info['mtl_group']
             sheet.cell(row=concept_single_part_row_num,
                        column=25).value = part_general_info['currency']
         ## target PVO
-        target_pvo_total = sql_NRM.get_part_target_pvo_total(project, part)
+        target_pvo_total = sql_nrm.get_part_target_pvo_total(project, part)
         if target_pvo_total:
             sheet.cell(row=concept_single_part_row_num,
                        column=20).value = target_pvo_total
 
         ## sourcing plan date
-        part_timing = sql_NRM.get_part_timing(project, part)
+        part_timing = sql_nrm.get_part_timing(project, part)
         if part_timing:
             sheet.cell(row=concept_single_part_row_num,
                        column=33).value = part_timing['nomination_date']

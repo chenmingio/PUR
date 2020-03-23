@@ -1,5 +1,5 @@
 import app.models.sql_project_info_extra
-from app.models import sql_NRM, csv_builder, load_excel, sql_quick_search, sql_logistics, logisitcs
+from app.models import sql_nrm, csv_builder, load_excel, sql_quick_search, sql_logistics, logisitcs
 from app.views import file_builder
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -50,19 +50,19 @@ def upload_file():
 # Sourcing Document helper: provide vendor options for project
 @app.route('/project/<project>/vendors')
 def return_vendors_by_project(project):
-    vendors = sql_NRM.get_vendor_list_by_project(project)
+    vendors = sql_nrm.get_vendor_list_by_project(project)
     return jsonify(vendors)
 
 
 @app.route('/project/<project>/vendor/<vendor>/parts')
 def return_parts_by_project_vendor(project, vendor):
-    parts = sql_NRM.get_part_list_by_project_vendor(project, vendor)
+    parts = sql_nrm.get_part_list_by_project_vendor(project, vendor)
     return jsonify(parts)
 
 
 @app.route('/project/<project>/parts')
 def return_parts_by_project(project):
-    parts = sql_NRM.get_part_list_by_project(project)
+    parts = sql_nrm.get_part_list_by_project(project)
     return jsonify(parts)
 
 

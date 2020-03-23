@@ -54,7 +54,7 @@ UPLOAD_SHEET_LIST = [
 
     # 31 nomination roadmap collector
     'project_data', 'part_data', 'project_timing', 'sourcing_concept',
-    'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest',
+    'rfq_part', 'rfq_invest', 'nomi_part', 'nomi_invest', 'project_info',
 
     # 32 logistics collector
     'tool_database', 'received_quantity', 'weekly_demand', 'contract_volume', 'apn_volume', 'tool_capacity',

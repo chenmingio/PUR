@@ -67,6 +67,21 @@ def create_part_info_table():
     CONN.commit()
 
 
+def create_project_volume_table():
+    """create a table into sqlite DB of project info, which is more precise than pandas auto loading."""
+
+    cursor = CONN.cursor()
+    cursor.execute('''
+        CREATE TABLE "project_volume" (
+	    "project"	TEXT NOT NULL,
+	    "year" INTEGER,
+	    "volume" INTEGER
+	    );
+             ''')
+
+    CONN.commit()
+
+
 def project_info_save_or_update(project_multidict):
     """save project info into Project INFO table"""
 
