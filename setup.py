@@ -4,6 +4,8 @@ from app.models.sql_project_info_extra import create_project_volume_table, creat
     create_project_info_table
 
 if __name__ == '__main__':
+
+    # create database scheme for project info extra
     create_project_info_table()
     create_part_info_table()
     create_project_volume_table()

@@ -126,11 +126,11 @@ def get_delivery(part, vendor):
                     capacity_start = max(date_0, delivery_start)
                     capacity_end = min(date_1, delivery_end)
 
-                    year_volume = capacity_function(part, vendor, get_fiscal_year(capacity_start))
-                    if key == "tool":
-                        week_capacity = get_vendor_weeks_per_year(vendor)
-                    else:
-                        week_capacity = year_volume / get_vendor_weeks_per_year(vendor) if year_volume else None
+                    rc = capacity_function(part, vendor, get_fiscal_year(capacity_start))
+                    if key == "tool":  # rc is the max capacity
+                        week_capacity = rc
+                    else:  # rc is yearly volumes̵
+                        week_capacity = rc / get_vendor_weeks_per_year(vendor) if rc else None
 
                     capacities[key].append(
                         {'interval': {'begin': capacity_start.isoformat()[:11], 'end': capacity_end.isoformat()[:11]},

@@ -48,6 +48,8 @@ def get_vendor_weeks_per_year(vendor):
         wpy = row['wpy']
         if wpy and wpy.isdigit() is True:
             return wpy
+        else:
+            return DEFAULT_WPY
     else:
         return DEFAULT_WPY
 
