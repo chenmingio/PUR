@@ -177,3 +177,6 @@ $RECYCLE.BIN/
 /bin
 /lib
 include/
+
+# database
+nr.db
