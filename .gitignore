@@ -167,7 +167,7 @@ $RECYCLE.BIN/
 .idea/
 /bin
 /lib
-include/
+/include/
 
 # database
 /data/nr.db
