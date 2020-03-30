@@ -4,7 +4,7 @@ from app.views import file_builder
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
-from config import TEMPLATE_FOLDER, UPLOAD_FOLDER, UPLOAD_FILE_LIST, SECRET_KEY
+from config import TEMPLATE_FOLDER, UPLOAD_FOLDER, UPLOAD_FILE_LIST, SECRET_KEY, DOWNLOAD_FOLDER
 from werkzeug.utils import secure_filename
 
 import json
@@ -26,11 +26,20 @@ def upload_file():
         # if user does not select file, browser also submit an empty part without filename
         if file.filename == '':
             return 'No selected file'
-        if file and (file.filename.split('.')[0] in UPLOAD_FILE_LIST):
+        if file:
             filename = secure_filename(file.filename)
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(file_path)
-            load_excel.load_excel(file_path)
+            basename, extension = filename.split('.')
+            print("debug: ", basename, extension)
+            # if it's video file, put into download folder
+            if basename in UPLOAD_FILE_LIST and extension != 'xlsx':
+                file_path = os.path.join(DOWNLOAD_FOLDER, filename)
+                file.save(file_path)
+            # if it's xlsx, load it to database
+            # TODO what about use download file folder ONLY?
+            if basename in UPLOAD_FILE_LIST and extension == 'xlsx':
+                file_path = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(file_path)
+                load_excel.load_excel(file_path)
             return f'file upload success: {filename}'
         else:
             return f'file {secure_filename(file.filename)} not allowed to upload.'

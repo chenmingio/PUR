@@ -28,6 +28,7 @@ UPLOAD_FILE_LIST = [
     '30_vendor_collector',
     '31_nomination_roadmap_collector',
     '32_logistics_collector',
+    'tutorial_sourcing_doc_auto',
 ]
 
 UPLOAD_SHEET_LIST = [
@@ -67,7 +68,7 @@ UPLOAD_SHEET_LIST = [
     'nl_pcb',
 ]
 
-ALLOWED_EXTENSIONS = ['xlsx', 'docx',]
+ALLOWED_EXTENSIONS = ['xlsx', 'docx', 'wmv']
 
 # Excel Sheet Password
 EXCEL_PASSWORD = '800520'
